@@ -1,0 +1,46 @@
+Darklight Protocol v0
+
+(c) Corbin Simpson, 2008
+
+This document is available under the terms of the GPL v2, see the 
+attached LICENSE file for details.
+
+In this document, "Darklight" may be abbreviated "DL."
+
+ ,~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~,
+{                        THE BASICS                       }
+ '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~'
+
+Darklight is a layer seven protocol, although it is intended to subsume 
+layers seven through five cleanly and seamlessly. Its design is modeled 
+loosely on some of the modern-day brightnet tools used for 
+communication, most notably HTTP/SSL, Direct Connect, and Bittorrent, 
+although out of all of those, only HTTP bears any resemblance to the 
+actual wire protocol of Darklight.
+
+Darklight's purpose is to provide a cryptographically impenetrable 
+system for transferring files of indeterminate size and contents. To 
+this end, the protocol has been designed to be secure while also being 
+somewhat distributable and hideable.
+
+ ,~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~,
+{                   ON-THE-WIRE COMMANDS                  }
+ '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~'
+
+<> are required parameters, [] are optional. All commands and parameters 
+are space-delimited except where otherwise noted, and terminate with a 
+carriage return and line feed (\r\n).
+
+HAI [challenge]
+
+ ~ This command authenticates a client with a server. [challenge] should 
+be a hash of the client's password, decided as follows:
+        Let W(plaintext, iterations) be the Whirlpool hash function. The 
+        hash is defined as:
+            hash = W(password, day of the month UTC)
+
+OHAI
+
+ ~ This command is sent by the server to notify the client that authentication
+was successful.
+
