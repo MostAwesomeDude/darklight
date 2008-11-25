@@ -38,14 +38,19 @@ conform.
 
 BAI
 
- ~ This command is sent by a client to notify the server that it intends
-to close the connection. Clients should wait for the server to respond,
-but they are allowed to terminate the connection after sending this.
+ ~ This reply indicates that the connection is safe to close, and that
+the server will no longer listen on this connection.
 
 CHECKAPI
 
  ~ This command allows a client to retrieve the version of the
 on-the-wire protocol that the server uses.
+
+FAIL
+
+ ~ This reply indicates an internal server error while handling the
+client's request. The server is permitted to terminate the connection
+with no further warning.
 
 HAI [challenge]
 
@@ -55,8 +60,33 @@ be a hash of the client's password, decided as follows:
         hash is defined as:
             hash = W(password, day of the month UTC)
 
+K <count>
+
+ ~ This reply indicates that the server is about to respond with <count>
+bytes of data, terminated with a full newline. The data sent depends on
+the previous request.
+
+KTHNXBAI
+
+ ~ This command is sent by a client to notify the server that it intends
+to close the connection. Clients should wait for the server to respond,
+but they are allowed to terminate the connection after sending this.
+
+LOLWUT
+
+ ~ This response indicates that the server does not understand the
+previous command. The server may close the connection.
+
 OHAI
 
  ~ This reply is sent by the server to notify the client that authentication
 was successful.
+
+SENDPEZE <hash> <piece>
+
+ ~ This command requests the <piece> from the file identified by <hash>.
+
+VERSION
+
+ ~ This command prompts the server to respond with an unformatted reply.
 
