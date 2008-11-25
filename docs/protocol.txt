@@ -31,6 +31,22 @@ somewhat distributable and hideable.
 are space-delimited except where otherwise noted, and terminate with a 
 carriage return and line feed (\r\n).
 
+API <protocol version>
+
+ ~ This reply contains the protocol version to which the server should
+conform.
+
+BAI
+
+ ~ This command is sent by a client to notify the server that it intends
+to close the connection. Clients should wait for the server to respond,
+but they are allowed to terminate the connection after sending this.
+
+CHECKAPI
+
+ ~ This command allows a client to retrieve the version of the
+on-the-wire protocol that the server uses.
+
 HAI [challenge]
 
  ~ This command authenticates a client with a server. [challenge] should 
@@ -41,6 +57,6 @@ be a hash of the client's password, decided as follows:
 
 OHAI
 
- ~ This command is sent by the server to notify the client that authentication
+ ~ This reply is sent by the server to notify the client that authentication
 was successful.
 
