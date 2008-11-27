@@ -6,7 +6,7 @@ import twisted.application.service
 import twisted.plugin
 import twisted.python.usage
 
-import darklight.DarkFactory
+from darklight.darktwist import DarkServerFactory
 
 class Options(twisted.python.usage.Options):
 	optParameters =  [
@@ -22,6 +22,6 @@ class DarkServiceMaker(object):
 
 	def makeService(self, options):
 		return twisted.application.internet.TCPServer(
-			int(options["port"]), darklight.DarkFactory())
+			int(options["port"]), DarkServerFactory())
 
 serviceMaker = DarkServiceMaker()
