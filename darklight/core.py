@@ -218,6 +218,7 @@ class DarkConf:
 		self.__dict__ = self._state
 
 	def parse(self, path):
+		DarkTimer().start("parsing configuration")
 		f = open(os.path.normpath(path))
 		for line in f.readlines():
 			try:
@@ -249,6 +250,7 @@ class DarkConf:
 			except IndexError:
 				warning("Bad config line:")
 				warning("\t%s" % line)
+		DarkTimer().stop("parsing configuration")
 
 try:
 	import apsw

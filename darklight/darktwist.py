@@ -158,9 +158,7 @@ class DarkServerFactory(twisted.internet.protocol.ServerFactory):
 		s.checkcount()
 
 	def conf(self, conffile):
-		DarkTimer().start("parsing configuration")
 		DarkConf().parse(conffile)
-		DarkTimer().stop("parsing configuration")
 		try:
 			import darknotify
 			d = darknotify.DarkNotify()
@@ -172,11 +170,10 @@ class DarkServerFactory(twisted.internet.protocol.ServerFactory):
 			print "\ttry installing pyinotify."
 
 	def __init__(self):
-		self.conf("darklight.conf")
 		for folder in DarkConf().folders:
 			os.path.walk(folder, DarkCache().add, None)
 		self.clientcreator = twisted.internet.protocol.ClientCreator(
-			twisted.internet.reactor, darkclient.DarkClientProtocol)
+			twisted.internet.reactor, DarkClientProtocol)
 		if DarkConf().immhash:
 			twisted.internet.reactor.callInThread(
 				DarkCache().update)
@@ -184,7 +181,8 @@ class DarkServerFactory(twisted.internet.protocol.ServerFactory):
 class DarkService(twisted.application.service.Service):
 
 	def getDarkFactory(self):
-		return DarkServerFactory()#!/usr/bin/env python
+		return DarkServerFactory()
+
 (PSEARCH, PPIECE) = range(2)
 
 class Darktask:
