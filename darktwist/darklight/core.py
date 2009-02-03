@@ -27,6 +27,11 @@ def makelong(str):
 		warning("Couldn't cast '%s' to long..." % str)
 
 try:
+	import apsw
+except ImportError:
+	error("Couldn't find APSW module...")
+
+try:
 	import tth
 except ImportError:
 	error("Couldn't find TTH module...")
@@ -134,7 +139,7 @@ class DarkCache:
 				if f.size > self.maxsize and self.iscached(f):
 					self.uncache(f)
 
-	def add(self, dir, path):
+	def add(self, blah, dir, path):
 		'''This is for os.path.walk()'''
 # Skip . files
 		for p in path:
@@ -217,6 +222,10 @@ class DarkConf:
 	def __init__(self):
 		self.__dict__ = self._state
 
+	def update(self, opts):
+		if opts['conf']:
+			self.parse(opts['conf'])
+
 	def parse(self, path):
 		f = open(os.path.normpath(path))
 		for line in f.readlines():
@@ -249,11 +258,6 @@ class DarkConf:
 			except IndexError:
 				warning("Bad config line:")
 				warning("\t%s" % line)
-
-try:
-	import apsw
-except ImportError:
-	error("Couldn't find APSW module...")
 
 class DarkDB:
 	_state = {"path": "darklight.db", "handle": None}

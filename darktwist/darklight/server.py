@@ -1,24 +1,15 @@
 #!/usr/bin/env python
 
-import base64
 import os.path
-import Queue
-
-import twisted.application.service
-
-import twisted.internet.defer
-import twisted.internet.protocol
-import twisted.internet.reactor
 
 import twisted.protocols.basic
 
-import twisted.python.log
-
 from darklight.core import DarkCache, DarkConf, DarkTimer
 
-class DarkProtocol(twisted.protocols.basic.LineReceiver):
+class DarkServerProtocol(twisted.protocols.basic.LineReceiver):
 
 	def __init__(self):
+		print "Protocol created..."
 		self.authorized = False
 
 	def checkapi(self, tokens):
@@ -94,8 +85,34 @@ class DarkProtocol(twisted.protocols.basic.LineReceiver):
 			#self.error()
 
 	def lineReceived(self, line):
+		print "Received line: %s" % line
 		self.dispatch(line)
 
 	def sendLine(self, line):
 		print "Sending '%s'" % line
 		twisted.protocols.basic.LineReceiver.sendLine(self, line)
+
+class DarkServerFactory(twisted.internet.protocol.ServerFactory):
+	protocol = DarkServerProtocol
+
+	def conf(self, conf):
+		DarkTimer().start("parsing configuration")
+		# DarkConf().parse(conf)
+		DarkConf().update(conf)
+		DarkTimer().stop("parsing configuration")
+		try:
+			d = DarkNotify()
+			d.start()
+			d.add(DarkConf().folders)
+			print "Started inotify thread..."
+		except (ImportError, NameError):
+			print "Couldn't start inotify thread,"
+			print "\ttry installing pyinotify."
+
+	def __init__(self, opts):
+		self.conf(opts)
+		for folder in DarkConf().folders:
+			os.path.walk(folder, DarkCache().add, None)
+		if DarkConf().immhash:
+			twisted.internet.reactor.callInThread(
+				DarkCache().update)
