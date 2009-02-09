@@ -1,11 +1,15 @@
-Darklight Protocol v0
+Darklight Protocol v1
 
-(c) Corbin Simpson, 2008
+(c) Corbin Simpson, 2008-09
 
-This document is available under the terms of the GPL v2, see the 
+This document is available under the terms of the GPL v2; see the 
 attached LICENSE file for details.
 
 In this document, "Darklight" may be abbreviated "DL."
+
+Feb 08, 2009: Major revision v1. Remove search functionality, divide
+   remaining commands into server- and client-side groups, change hash
+   definition.
 
  ,~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~,
 {                        THE BASICS                       }
@@ -31,6 +35,50 @@ somewhat distributable and hideable.
 are space-delimited except where otherwise noted, and terminate with a 
 carriage return and line feed (\r\n).
 
+ ~~ CLIENT COMMANDS ~~
+
+All of the following may only be issued by clients. Reply: fields denote
+replies which the server should issue upon success.
+
+CHECKAPI
+
+ ~ This command allows a client to retrieve the version of the
+on-the-wire protocol that the server uses.
+ ~ Reply: API
+
+HAI [challenge]
+
+ ~ This command authenticates a client with a server. [challenge] should 
+be a hash of the client's password, decided as follows:
+        Let W(plaintext, iterations) be the Whirlpool hash function. The 
+        hash is defined as:
+            hash = W(password, (day of the month UTC + 42))
+   Servers may not require [challenge] but are allowed to deny
+   authentication in that case. If an authentication is unsuccessful,
+   the server's reply is undefined.
+ ~ Reply: OHAI
+
+KTHNXBAI
+
+ ~ This command is sent by a client to notify the server that it intends
+to close the connection. Clients should wait for the server to respond,
+but they are allowed to terminate the connection after sending this.
+ ~ Reply: BAI
+
+SENDPEZE <hash> <size> <piece>
+
+ ~ This command requests the <piece> from the file identified by <hash>
+   and <size>.
+ ~ Reply: K
+
+VERSION
+
+ ~ This command prompts the server to respond with an unformatted reply.
+   The server should reply with a single line describing its version and
+   vendor, although there are no requirements for the reply.
+
+ ~~ SERVER REPLIES ~~
+
 API <protocol version>
 
  ~ This reply contains the protocol version to which the server should
@@ -41,34 +89,11 @@ BAI
  ~ This reply indicates that the connection is safe to close, and that
 the server will no longer listen on this connection.
 
-CANHAZ <hash>
-
- ~ This command requests FILE entries from the server. The server will
-return NOHAZ if no entries exist.
-
-CHECKAPI
-
- ~ This command allows a client to retrieve the version of the
-on-the-wire protocol that the server uses.
-
 FAIL
 
  ~ This reply indicates an internal server error while handling the
 client's request. The server is permitted to terminate the connection
 with no further warning.
-
-FILE <hash> <size>
-
- ~ This reply is an essential file entry. It contains the <hash> of the
-file, and the file's <size> in bytes.
-
-HAI [challenge]
-
- ~ This command authenticates a client with a server. [challenge] should 
-be a hash of the client's password, decided as follows:
-        Let W(plaintext, iterations) be the Whirlpool hash function. The 
-        hash is defined as:
-            hash = W(password, day of the month UTC)
 
 K <count>
 
@@ -76,37 +101,12 @@ K <count>
 bytes of data, terminated with a full newline. The data sent depends on
 the previous request.
 
-KTHNX
-
- ~ This reply ends a multiline reply from the server and/or notifies the
-client that it is finished processing the command.
-
-KTHNXBAI
-
- ~ This command is sent by a client to notify the server that it intends
-to close the connection. Clients should wait for the server to respond,
-but they are allowed to terminate the connection after sending this.
-
 LOLWUT
 
  ~ This response indicates that the server does not understand the
 previous command. The server may close the connection.
 
-NOHAZ [hash]
-
- ~ This reply indicates that the server does not have any entries for
-the previous request, or optionally for [hash] if present.
-
 OHAI
 
  ~ This reply is sent by the server to notify the client that authentication
 was successful.
-
-SENDPEZE <hash> <piece>
-
- ~ This command requests the <piece> from the file identified by <hash>.
-
-VERSION
-
- ~ This command prompts the server to respond with an unformatted reply.
-
