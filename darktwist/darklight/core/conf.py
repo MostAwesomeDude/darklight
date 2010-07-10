@@ -5,8 +5,7 @@ import os
 from cache import DarkCache
 from db import DarkDB
 
-def warning(str):
-    print "Warning: %s" % str
+import logging
 
 class DarkConf:
     """An object that parses configuration."""
@@ -35,7 +34,7 @@ class DarkConf:
                     if os.path.exists(path):
                         self.folders.append(path)
                     else:
-                        warning("Path %s does not exist!" % path)
+                        logging.warning("Path %s does not exist!" % path)
                 elif tokens[0] == "CACHE":
                     DarkCache().setsize(tokens[1])
                 elif tokens[0] == "DB":
@@ -50,8 +49,8 @@ class DarkConf:
                     if tokens[1].startswith("imm"):
                         self.immhash = True
                 else:
-                    warning("Unknown config line, skipping:")
-                    warning("\t%s" % line)
+                    logging.warning("Unknown config line, skipping:")
+                    logging.warning("\t%s" % line)
             except IndexError:
-                warning("Bad config line:")
-                warning("\t%s" % line)
+                logging.warning("Bad config line:")
+                logging.warning("\t%s" % line)

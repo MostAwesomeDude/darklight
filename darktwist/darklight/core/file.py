@@ -6,9 +6,7 @@ import stat
 from db import DarkDB
 from timer import DarkTimer
 
-def debug(string):
-    if True:
-        print "Debug:", string
+import logging
 
 class DarkFile:
     """An object representing a file in the system."""
@@ -24,7 +22,7 @@ class DarkFile:
         self.blocksize = 128*1024
         self.dirty = True
         DarkDB().verify(self)
-        debug("DarkFile: " + self.path)
+        logging.debug("DarkFile: " + self.path)
 
     def info(self):
         return (self.size, self.tth.getroot(), self.dirty)
@@ -76,5 +74,5 @@ class DarkFile:
             return None
 
     def dump(self):
-        debug((self.size, self.tth.getroot()))
+        logging.debug((self.size, self.tth.getroot()))
 #self.tth.dump()

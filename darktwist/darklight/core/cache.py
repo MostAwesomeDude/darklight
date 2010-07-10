@@ -7,15 +7,13 @@ import os
 from file import DarkFile
 from timer import DarkTimer
 
-def debug(string):
-    if True:
-        print "Debug:", string
+import logging
 
 def makelong(str):
     try:
         return long(str)
     except ValueError:
-        debug("Couldn't cast '%s' to long..." % str)
+        logging.debug("Couldn't cast '%s' to long..." % str)
 
 class DarkCache:
     """A Borg that manages the cache."""
@@ -36,8 +34,8 @@ class DarkCache:
         return iter(self.files)
 
     def dump(self):
-        debug("Cache size: " + str(self.size))
-        debug("Cache maxsize: " + str(self.maxsize))
+        logging.debug("Cache size: " + str(self.size))
+        logging.debug("Cache maxsize: " + str(self.maxsize))
 
     def setsize(self, size):
         self.maxsize = int(size)
