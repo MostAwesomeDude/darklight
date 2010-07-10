@@ -10,7 +10,7 @@ import tiger
 class TTH:
 	"""A class describing a Tiger Tree Hash tree."""
 
-	def __init__(self, file=None, thex=True, maxlevels=0, blocksize=1024):
+	def __init__(self, filename=None, thex=True, maxlevels=0, blocksize=1024):
 		self.inited = False
 		self.thex = thex
 		self.maxlevels = maxlevels
@@ -18,8 +18,8 @@ class TTH:
 			self.blocksize = 1024
 		else:
 			self.blocksize = blocksize
-		if file:
-			self.buildtree(file)
+		if filename:
+			self.buildtree(filename)
 
 	def buildtree(self, f):
 		"""Build the tree."""
