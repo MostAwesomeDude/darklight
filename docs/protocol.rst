@@ -1,15 +1,29 @@
+.. include:: <isonum.txt>
+
 Darklight Protocol v1
 
-(c) Corbin Simpson, 2008-09
+|copy| Corbin Simpson, 2008-10
 
-This document is available under the terms of the GPL v2; see the 
-attached LICENSE file for details.
+:Author: Corbin Simpson
+:Version: v0
+
+This document is in the public domain, to the extent that it is legally
+permitted.
 
 In this document, "Darklight" may be abbreviated "DL."
 
-Feb 08, 2009: Major revision v1. Remove search functionality, divide
-   remaining commands into server- and client-side groups, change hash
-   definition.
+Changelog
+=========
+
+Feb 08, 2009: Major revision v1.
+
+ * Remove search functionality
+ * Divide commands into server- and client-side groups
+ * Change hash definition.
+
+Jul 10, 2010: Major revision v0.
+
+ * Rewind version number to prerelease, indicating unstable API.
 
 Introduction
 ============
@@ -25,12 +39,18 @@ transferring files of indeterminate size and contents. To this end, the
 protocol has been designed to be secure while also being somewhat
 distributable and hideable.
 
+Abbreviations
+=============
+
+DL
+    Darklight.
+
 On-the-wire Commands
 ====================
 
-<> are required parameters, [] are optional. All commands and parameters 
-are space-delimited except where otherwise noted, and terminate with a 
-carriage return and line feed (\r\n).
+<> are required parameters, [] are optional. All commands and parameters
+are space-delimited except where otherwise noted, and terminate with a
+carriage return and line feed (\\r\\n).
 
 Client Commands
 ---------------
@@ -46,14 +66,13 @@ CHECKAPI
 
 HAI [challenge]
 
- * This command authenticates a client with a server. [challenge] should be a
-   hash of the client's password, decided as follows:
-        Let W(plaintext, iterations) be the Whirlpool hash function. The 
-        hash is defined as:
-            hash = W(password, (day of the month UTC + 42))
-   Servers may not require [challenge] but are allowed to deny
-   authentication in that case. If an authentication is unsuccessful,
-   the server's reply is undefined.
+ * This command authenticates a client with a server, using the challenge hash
+   described in `Hashes`.
+ * Servers may not require [challenge] but are allowed to deny
+   authentication in that case.
+ * If an authentication is unsuccessful, the server's reply is undefined.
+   Servers are encouraged to remain completely silent and remain in
+   passthrough mode if possible.
  * Reply: OHAI
 
 KTHNXBAI
@@ -109,3 +128,14 @@ OHAI
 
  * This reply is sent by the server to notify the client that authentication
    was successful.
+
+Hashes
+======
+
+Challenges
+----------
+
+The challenge hash is used by clients to authenticate with servers. The
+challenge should be a hash of the client's password. Let W(plaintext,
+iterations) be the Whirlpool hash function. The hash is defined as W(password,
+(day of the month UTC + 42)).
