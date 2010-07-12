@@ -1,14 +1,18 @@
 #!/usr/bin/env python
 
+import logging
 import os.path
 
 import zope.interface
 import twisted.application.internet
 import twisted.application.service
 import twisted.plugin
+import twisted.python.log
 import twisted.python.usage
 
 from darklight.server import DarkServerFactory
+
+logging.basicConfig(loglevel=logging.DEBUG)
 
 class Options(twisted.python.usage.Options):
     optParameters =  [
@@ -32,6 +36,8 @@ class DarkServiceMaker(object):
     options = Options
 
     def makeService(self, options):
+        twisted.python.log.PythonLoggingObserver().start()
+
         return twisted.application.internet.TCPServer(
             int(options["port"]), DarkServerFactory(options))
 

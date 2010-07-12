@@ -6,6 +6,7 @@ from cache import DarkCache
 from db import DarkDB
 
 import logging
+logging.basicConfig(level=logging.DEBUG)
 
 class DarkConf:
     """An object that parses configuration."""

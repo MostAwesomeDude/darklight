@@ -7,6 +7,7 @@ from db import DarkDB
 from timer import DarkTimer
 
 import logging
+logging.basicConfig(level=logging.DEBUG)
 
 class DarkFile:
     """An object representing a file in the system."""

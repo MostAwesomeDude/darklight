@@ -1,6 +1,9 @@
 #!/usr/bin/env python
 
+import logging
 import time
+
+logging.basicConfig(level=logging.DEBUG)
 
 class DarkTimer:
     _state = {"clocks": dict(), "timeouts": dict()}
@@ -16,7 +19,7 @@ class DarkTimer:
 
     def stop(self, string):
         elapsed = time.time() - self.clocks.get(string)
-        print "Timer:", string, "finished in %.6f seconds" % elapsed
+        logging.info("Timer: %s finished in %.6f seconds" % (string, elapsed))
 
     def timeout(self, string, count):
         self.timeouts[string] = time.time() + count

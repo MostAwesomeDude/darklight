@@ -8,6 +8,7 @@ from file import DarkFile
 from timer import DarkTimer
 
 import logging
+logging.basicConfig(level=logging.DEBUG)
 
 def makelong(str):
     try:
