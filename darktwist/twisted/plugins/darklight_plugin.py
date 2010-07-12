@@ -17,8 +17,12 @@ class Options(twisted.python.usage.Options):
     ]
 
     def postOptions(self):
-        if self['conf'] and not os.path.isfile(self['conf']):
-            raise twisted.python.usage.UsageError, "Bad conf file."
+        if not self['conf']:
+            raise twisted.python.usage.UsageError(
+                "No configuration file specified.")
+        if not os.path.isfile(self['conf']):
+            raise twisted.python.usage.UsageError(
+                "Could not find configuration file.")
 
 class DarkServiceMaker(object):
     zope.interface.implements(twisted.application.service.IServiceMaker,
