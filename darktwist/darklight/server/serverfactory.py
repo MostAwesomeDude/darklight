@@ -13,7 +13,7 @@ class DarkServerFactory(twisted.internet.protocol.ServerFactory):
 
     def configure(self, opts):
         DarkTimer().start("parsing configuration")
-        self.dc.update(opts)
+        self.dc.parse(opts["conf"])
         DarkTimer().stop("parsing configuration")
         try:
             # XXX stopgap

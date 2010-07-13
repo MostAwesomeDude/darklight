@@ -11,13 +11,11 @@ logging.basicConfig(level=logging.DEBUG)
 class DarkConf(object):
     """An object that parses configuration."""
 
-    folders = list()
-    remotes = list()
     immhash = False
 
-    def update(self, opts):
-        if opts['conf']:
-            self.parse(opts['conf'])
+    def __init__(self):
+        self.folders = list()
+        self.remotes = list()
 
     def parse(self, path):
         f = open(os.path.normpath(path))
