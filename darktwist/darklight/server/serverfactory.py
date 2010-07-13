@@ -11,26 +11,26 @@ from serverprotocol import DarkServerProtocol
 class DarkServerFactory(twisted.internet.protocol.ServerFactory):
     protocol = DarkServerProtocol
 
-    def conf(self, conf):
+    def configure(self, opts):
         DarkTimer().start("parsing configuration")
-        # DarkConf().parse(conf)
-        DarkConf().update(conf)
+        self.dc.update(opts)
         DarkTimer().stop("parsing configuration")
         try:
             # XXX stopgap
             raise ImportError
             d = DarkNotify()
             d.start()
-            d.add(DarkConf().folders)
+            d.add(self.dc.folders)
             print "Started inotify thread..."
         except (ImportError, NameError):
             print "Couldn't start inotify thread,"
             print "\ttry installing pyinotify."
 
     def __init__(self, opts):
-        self.conf(opts)
-        for folder in DarkConf().folders:
+        self.dc = DarkConf()
+        self.configure(opts)
+        for folder in self.dc.folders:
             os.path.walk(folder, DarkCache().add, None)
-        if DarkConf().immhash:
+        if self.dc.immhash:
             twisted.internet.reactor.callInThread(
                 DarkCache().update)

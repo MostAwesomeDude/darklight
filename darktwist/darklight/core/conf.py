@@ -8,16 +8,12 @@ from db import DarkDB
 import logging
 logging.basicConfig(level=logging.DEBUG)
 
-class DarkConf:
+class DarkConf(object):
     """An object that parses configuration."""
-    _state = {"folders": [], "remotes": [], "immhash": False}
 
-    folders = None
-    remotes = None
-    immhash = None
-
-    def __init__(self):
-        self.__dict__ = self._state
+    folders = list()
+    remotes = list()
+    immhash = False
 
     def update(self, opts):
         if opts['conf']:
