@@ -3,6 +3,8 @@
 import os
 import stat
 
+import tth
+
 from db import DarkDB
 from timer import DarkTimer
 
@@ -73,4 +75,4 @@ class DarkFile:
 
     def dump(self):
         logging.debug((self.size, self.tth.getroot()))
-        self.tth.dump()
+        # self.tth.dump()

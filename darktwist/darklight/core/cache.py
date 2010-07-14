@@ -59,6 +59,12 @@ class DarkCache:
     def update(self):
         [f.update() for f in self.files]
 
+    def update_single(self):
+        try:
+            next(i for i in self.files if i.dirty).update()
+        except StopIteration:
+            pass
+
     def iscached(self, piece):
         return self.pcache.has_key(piece)
 

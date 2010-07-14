@@ -3,6 +3,7 @@
 import os
 
 import twisted.internet.protocol
+import twisted.internet.task
 
 from darklight.core import DarkCache, DarkConf, DarkTimer
 
@@ -32,5 +33,9 @@ class DarkServerFactory(twisted.internet.protocol.ServerFactory):
         for folder in self.dc.folders:
             os.path.walk(folder, DarkCache().add, None)
         if self.dc.immhash:
-            twisted.internet.reactor.callInThread(
-                DarkCache().update)
+            DarkTimer().start("hashing files offline")
+            DarkCache().update()
+            DarkTimer().stop("hashing files offline")
+        else:
+            loop = twisted.internet.task.LoopingCall(DarkCache().update_single)
+            loop.start(1.0)
