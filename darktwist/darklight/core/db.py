@@ -22,7 +22,7 @@ class DarkDB:
     def initdb(self):
         handle = apsw.Connection(self.path)
         cursor = handle.cursor()
-        cursor.execute("create table files(serial primary key, path, size, mtime, tth blob)")
+        cursor.execute("create table files(serial primary key, text path, size, mtime, tth blob)")
         handle.close()
 
     def connect(self):
