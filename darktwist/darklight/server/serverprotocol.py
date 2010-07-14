@@ -7,6 +7,17 @@ import twisted.protocols.basic
 
 from darklight.core import DarkCache, DarkConf, DarkTimer
 
+# XXX should live somewhere better
+def canonicalize_tth(tth):
+    if len(tth) == 48:
+        return binascii.unhexlify(tth)
+    elif len(tth) == 40:
+        return base64.b32decode(tth)
+    elif len(tth) == 24:
+        return tth
+    else:
+        raise ValueError, "Couldn't guess the TTH format"
+
 class DarkServerProtocol(twisted.protocols.basic.LineReceiver):
 
     def __init__(self):
@@ -40,13 +51,14 @@ class DarkServerProtocol(twisted.protocols.basic.LineReceiver):
 
         try:
             h, size, piece = tokens
+            h = canonicalize_tth(h)
             size = int(size)
             piece = int(piece)
         except ValueError:
             self.error()
             return
 
-        l = self.factory.cache.search((h, size))
+        l = self.factory.cache.search(h, size)
         if len(l) == 1:
             buf = self.factory.cache.getdata(l[0], piece)
             if not buf:

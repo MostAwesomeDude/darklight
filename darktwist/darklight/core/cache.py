@@ -93,23 +93,8 @@ class DarkCache(object):
             self.precache(piece, data)
             return data
 
-    def search(self, tokens):
+    def search(self, tth, size):
         DarkTimer().start("search")
-        tth = None
-        size = None
-        for token in tokens:
-            if len(token) == 48:
-                tth = binascii.unhexlify(token)
-            elif len(token) == 40:
-                tth = base64.b32decode(token)
-            elif len(token) == 24:
-                tth = token
-            elif not len(token):
-                continue
-            else:
-                size = makelong(token)
-                if not size:
-                    return None
-        l = [f for f in self.files if f.match(size, tth)]
+        l = [f for f in self.files if f.match(tth, size)]
         DarkTimer().stop("search")
         return l

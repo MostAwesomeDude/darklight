@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import base64
 import os
 import stat
 
@@ -27,14 +28,16 @@ class DarkFile:
     def info(self):
         return (self.size, self.tth.getroot(), self.dirty)
 
-    def match(self, size, tth):
+    def match(self, tth, size):
+        logging.debug((size, tth))
+        logging.debug((self.size, self.tth.getroot()))
         if not size and not tth:
             return False
         if size and (size != self.size):
             return False
         if self.dirty:
             self.update()
-        if tth and (tth != self.tth.getroot()):
+        if tth and (base64.b32encode(tth) != self.tth.getroot()):
             return False
         return True
 
