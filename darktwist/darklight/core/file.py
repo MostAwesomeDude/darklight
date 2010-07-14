@@ -60,7 +60,7 @@ class DarkFile:
 
     def getdata(self, pnum):
         self.update()
-        offset = self.blocksize*pnum
+        offset = self.blocksize * pnum
         if offset < self.size:
             buf = ""
             f = open(self.path, "rb")
@@ -73,4 +73,4 @@ class DarkFile:
 
     def dump(self):
         logging.debug((self.size, self.tth.getroot()))
-#self.tth.dump()
+        self.tth.dump()

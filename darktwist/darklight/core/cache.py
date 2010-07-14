@@ -78,7 +78,6 @@ class DarkCache:
         del self.pcache[piece]
 
     def getpiece(self, file, pnum):
-
         return file.getpiece(pnum)
 
     def getdata(self, file, pnum):

@@ -53,14 +53,14 @@ class DarkDB:
             return None
         cursor = self.handle.cursor()
         cursor.execute("select * from files where path=?", (file.path,))
-        temp = [i for i in cursor]
-        if len(temp) == 0:
+        try:
+            serial, path, size, mtime, hashblob = next(cursor)
+        except StopIteration:
             return
-        oldfile = temp[0]
-        if (oldfile[2] != file.size) or (oldfile[3] != file.mtime):
+        if size != file.size or mtime != file.mtime:
             cursor.execute("update files set size=?, mtime=? where path=?",
                 (file.size, file.mtime, file.path))
             file.dirty = True
         else:
-            file.tth = pickle.loads(oldfile[4])
+            file.tth = pickle.loads(hashblob)
             file.dirty = False
