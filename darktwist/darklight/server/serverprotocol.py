@@ -31,19 +31,30 @@ class DarkServerProtocol(twisted.protocols.basic.LineReceiver):
         self.bai(tokens)
 
     def sendpeze(self, tokens):
-        if not int(tokens[0]) >= 0:
+        """
+        SENDPEZE <hash> <size> <piece>
+
+        The hash is some form of TTH hash. The size and piece are ASCII
+        decimal.
+        """
+
+        try:
+            h, size, piece = tokens
+            size = int(size)
+            piece = int(piece)
+        except ValueError:
             self.error()
             return
-        l = self.factory.cache.search(tokens[0:-1])
-        if l and len(l) == 1:
-            pnum = long(tokens[-1])
-            buf = self.factory.cache.getdata(l[0], pnum)
+
+        l = self.factory.cache.search((h, size))
+        if len(l) == 1:
+            buf = self.factory.cache.getdata(l[0], piece)
             if not buf:
                 print "File buffer was bad..."
                 self.error()
                 return
             i, sent = 0, 0
-            tth = base64.b32encode(self.factory.cache.getpiece(l[0], pnum))
+            tth = base64.b32encode(self.factory.cache.getpiece(l[0], piece))
             self.sendLine("K %s %s" % (tth, str(len(buf))))
             self.sendLine(buf)
         else:
