@@ -10,11 +10,11 @@ from timer import DarkTimer
 import logging
 logging.basicConfig(level=logging.DEBUG)
 
-def makelong(str):
+def makelong(s):
     try:
-        return long(str)
+        return long(s)
     except ValueError:
-        logging.debug("Couldn't cast '%s' to long..." % str)
+        logging.debug("Couldn't cast '%s' to long..." % s)
 
 class DarkCache:
     """A Borg that manages the cache."""
@@ -65,12 +65,9 @@ class DarkCache:
         except StopIteration:
             pass
 
-    def iscached(self, piece):
-        return self.pcache.has_key(piece)
-
     def precache(self, piece, data):
         # Already cached?
-        if self.iscached(file):
+        if piece in self.pcache:
             return
         # Too big to fit into cache?
         if len(data) + self.size >= self.maxsize:
@@ -79,30 +76,30 @@ class DarkCache:
         self.size += len(self.pcache[piece])
 
     def uncache(self, piece):
-        if not self.iscached(file):
-            return
-        self.size -= len(self.pcache[piece])
-        del self.pcache[piece]
+        if piece in self.pcache:
+            self.size -= len(self.pcache[piece])
+            del self.pcache[piece]
 
-    def getpiece(self, file, pnum):
-        return file.getpiece(pnum)
+    def getpiece(self, f, pnum):
+        return f.getpiece(pnum)
 
-    def getdata(self, file, pnum):
-        assert file in self.files, "Who decided *you* could have a DarkFile?"
-        piece = file.getpiece(pnum)
+    def getdata(self, f, pnum):
+        assert f in self.files, "Who decided *you* could have a DarkFile?"
+        piece = f.getpiece(pnum)
         if not piece:
             # OOB?
             return None
-        if self.iscached(piece):
+        if piece in self.pcache:
             return self.pcache[piece]
         else:
-            data = file.getdata(pnum)
+            data = f.getdata(pnum)
             self.precache(piece, data)
             return data
 
     def search(self, tokens):
         DarkTimer().start("search")
-        tth = size = None
+        tth = None
+        size = None
         for token in tokens:
             if len(token) == 48:
                 tth = binascii.unhexlify(token)
