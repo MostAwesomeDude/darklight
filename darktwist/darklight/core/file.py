@@ -11,11 +11,8 @@ logging.basicConfig(level=logging.DEBUG)
 
 class DarkFile:
     """An object representing a file in the system."""
-    _state = {"serial": 0}
 
     def __init__(self, path):
-        self.serial = self._state.get("serial")
-        self._state["serial"] += 1
         self.path = os.path.normpath(path).decode("utf8")
         s = os.stat(self.path)
         self.size = s[stat.ST_SIZE]

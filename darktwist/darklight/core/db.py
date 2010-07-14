@@ -44,6 +44,7 @@ class DarkDB:
         buf = buffer(pickle.dumps(file.tth, 1))
         if len(temp) == 0:
             cursor.execute("insert into files values (null,?,?,?,?)", (file.path, file.size, file.mtime, buf))
+            file.serial = self.handle.last_insert_rowid()
         else:
             cursor.execute("update files set size=?, mtime=?, tth=? where path=?", (file.size, file.mtime, buf, file.path))
 
