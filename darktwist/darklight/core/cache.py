@@ -48,7 +48,7 @@ class DarkCache:
 
     def add(self, blah, dir, path):
         '''This is for os.path.walk()'''
-# Skip . files
+        # Skip . files
         for p in path:
             if p.startswith('.'):
                 path.remove(p)
@@ -69,10 +69,10 @@ class DarkCache:
         return self.pcache.has_key(piece)
 
     def precache(self, piece, data):
-# Already cached?
+        # Already cached?
         if self.iscached(file):
             return
-# Too big to fit into cache?
+        # Too big to fit into cache?
         if len(data) + self.size >= self.maxsize:
             return
         self.pcache[piece] = data
@@ -91,7 +91,7 @@ class DarkCache:
         assert file in self.files, "Who decided *you* could have a DarkFile?"
         piece = file.getpiece(pnum)
         if not piece:
-# OOB?
+            # OOB?
             return None
         if self.iscached(piece):
             return self.pcache[piece]
