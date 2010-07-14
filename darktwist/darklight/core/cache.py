@@ -30,6 +30,7 @@ class DarkCache:
 
     def __init__(self):
         self.__dict__ = self._state
+        self.dump()
 
     def __iter__(self):
         return iter(self.files)
@@ -51,7 +52,7 @@ class DarkCache:
         for p in path:
             if p.startswith('.'):
                 path.remove(p)
-        for f in [os.path.join(dir, i) for i in path]:
+        for f in (os.path.join(dir, i) for i in path):
             if os.path.isfile(f):
                 self.files.append(DarkFile(f))
 
@@ -95,7 +96,6 @@ class DarkCache:
 
     def search(self, tokens):
         DarkTimer().start("search")
-        l = []
         tth = size = None
         for token in tokens:
             if len(token) == 48:
@@ -110,8 +110,6 @@ class DarkCache:
                 size = makelong(token)
                 if not size:
                     return None
-        for f in self.files:
-            if f.match(size, tth):
-                l.append(f)
+        l = [f for f in self.files if f.match(size, tth)]
         DarkTimer().stop("search")
         return l
