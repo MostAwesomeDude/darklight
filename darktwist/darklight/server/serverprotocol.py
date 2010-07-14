@@ -34,16 +34,16 @@ class DarkServerProtocol(twisted.protocols.basic.LineReceiver):
         if not int(tokens[0]) >= 0:
             self.error()
             return
-        l = DarkCache().search(tokens[0:-1])
+        l = self.factory.cache.search(tokens[0:-1])
         if l and len(l) == 1:
             pnum = long(tokens[-1])
-            buf = DarkCache().getdata(l[0], pnum)
+            buf = self.factory.cache.getdata(l[0], pnum)
             if not buf:
                 print "File buffer was bad..."
                 self.error()
                 return
             i, sent = 0, 0
-            tth = base64.b32encode(DarkCache().getpiece(l[0], pnum))
+            tth = base64.b32encode(self.factory.cache.getpiece(l[0], pnum))
             self.sendLine("K %s %s" % (tth, str(len(buf))))
             self.sendLine(buf)
         else:

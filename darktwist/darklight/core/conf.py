@@ -12,6 +12,7 @@ class DarkConf(object):
     """An object that parses configuration."""
 
     immhash = False
+    cache_size = 10 * 1024 * 1024
 
     def __init__(self):
         self.folders = list()
@@ -31,7 +32,7 @@ class DarkConf(object):
                     else:
                         logging.warning("Path %s does not exist!" % path)
                 elif tokens[0] == "CACHE":
-                    DarkCache().setsize(tokens[1])
+                    self.cache_size = int(tokens[1])
                 elif tokens[0] == "DB":
                     DarkDB().path = tokens[1]
                 elif tokens[0] == "REMOTE":

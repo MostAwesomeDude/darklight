@@ -16,20 +16,17 @@ def makelong(s):
     except ValueError:
         logging.debug("Couldn't cast '%s' to long..." % s)
 
-class DarkCache:
-    """A Borg that manages the cache."""
-    _state = {"n": None, "files": [], "pcache": dict(), "phits": dict(),
-    "maxsize": 10*1024*1024, "size": 0}
+class DarkCache(object):
+    """
+    A simple cache and file manager.
+    """
 
-    n = None
-    files = None
-    pcache = None
-    phits = None
-    maxsize = None
-    size = None
-
-    def __init__(self):
-        self.__dict__ = self._state
+    def __init__(self, maxsize):
+        self.files = []
+        self.pcache = {}
+        self.phits = {}
+        self.size = 0
+        self.maxsize = maxsize
         self.dump()
 
     def __iter__(self):
