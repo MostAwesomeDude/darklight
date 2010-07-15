@@ -32,6 +32,8 @@ class DarkServerFactory(twisted.internet.protocol.ServerFactory):
         self.configure(opts)
 
         self.db = DarkDB()
+        if self.dc.path:
+            self.db.path = self.dc.path
         self.db.connect()
 
         self.cache = DarkCache(self.dc.cache_size)

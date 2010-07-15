@@ -27,3 +27,11 @@ class TestDarkConf(unittest.TestCase):
             tf.flush()
             self.dc.parse(tf.name)
             self.assertTrue(self.dc.immhash)
+
+    def test_path(self):
+        with tempfile.NamedTemporaryFile() as tf:
+            path = "test.db"
+            tf.write("DB %s" % path)
+            tf.flush()
+            self.dc.parse(tf.name)
+            self.assertEqual(path, self.dc.path)
