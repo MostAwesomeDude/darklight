@@ -11,33 +11,25 @@ except ImportError:
     sys.exit()
 
 class DarkDB:
-    _state = {"path": "darklight.db", "handle": None}
-
-    path = None
+    path = "darklight.db"
     handle = None
 
-    def __init__(self):
-        self.__dict__ = self._state
-
-    def initdb(self):
-        handle = apsw.Connection(self.path)
-        cursor = handle.cursor()
-        cursor.execute("create table files(serial primary key, path text, size, mtime, tth blob)")
-        handle.close()
-
     def connect(self):
-        if self.handle:
-            return True
-        if not self.path:
-            return False
         if not os.path.exists(self.path):
             self.initdb()
-        self.handle = apsw.Connection(self.path)
+        if not self.handle:
+            self.handle = apsw.Connection(self.path)
         return True
 
+    def initdb(self):
+        self.handle = apsw.Connection(self.path)
+        cursor = handle.cursor()
+        cursor.execute("create table files(serial primary key, path text, size, mtime, tth blob)")
+
     def update(self, file):
-        if not self.connect():
-            return
+        if not self.handle:
+            raise Exception, "Not connected!"
+
         cursor = self.handle.cursor()
         cursor.execute("select * from files where path=?", (file.path,))
         temp = [i for i in cursor]
@@ -49,8 +41,9 @@ class DarkDB:
             cursor.execute("update files set size=?, mtime=?, tth=? where path=?", (file.size, file.mtime, buf, file.path))
 
     def verify(self, file):
-        if not self.connect():
-            return None
+        if not self.handle:
+            raise Exception, "Not connected!"
+
         cursor = self.handle.cursor()
         cursor.execute("select * from files where path=?", (file.path,))
         try:

@@ -21,6 +21,8 @@ class DarkCache(object):
     A simple cache and file manager.
     """
 
+    db = None
+
     def __init__(self, maxsize):
         self.files = []
         self.pcache = {}
@@ -51,14 +53,18 @@ class DarkCache(object):
                 path.remove(p)
         for f in (os.path.join(dir, i) for i in path):
             if os.path.isfile(f):
-                self.files.append(DarkFile(f))
+                f = DarkFile(f)
+                self.db.verify(f)
+                self.files.append(f)
 
     def update(self):
-        [f.update() for f in self.files]
+        [f.update() or self.db.update(f) for f in self.files]
 
     def update_single(self):
         try:
-            next(i for i in self.files if i.dirty).update()
+            f = next(i for i in self.files if i.dirty)
+            f.update()
+            self.db.update(f)
         except StopIteration:
             pass
 

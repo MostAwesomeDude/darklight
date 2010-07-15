@@ -6,7 +6,6 @@ import stat
 
 import tth
 
-from db import DarkDB
 from timer import DarkTimer
 
 import logging
@@ -22,7 +21,6 @@ class DarkFile:
         self.mtime = s[stat.ST_MTIME]
         self.blocksize = 128*1024
         self.dirty = True
-        DarkDB().verify(self)
         logging.debug("DarkFile: " + self.path)
 
     def info(self):
@@ -49,11 +47,9 @@ class DarkFile:
         DarkTimer().stop("hashing " + self.path)
 
     def update(self):
-        if not self.dirty:
-            return
-        self.hash()
-        self.dirty = False
-        DarkDB().update(self)
+        if self.dirty:
+            self.hash()
+            self.dirty = False
 
     def getpiece(self, pnum):
         self.update()

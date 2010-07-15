@@ -11,8 +11,9 @@ logging.basicConfig(level=logging.DEBUG)
 class DarkConf(object):
     """An object that parses configuration."""
 
-    immhash = False
     cache_size = 10 * 1024 * 1024
+    immhash = False
+    path = None
 
     def __init__(self):
         self.folders = list()
@@ -34,7 +35,7 @@ class DarkConf(object):
                 elif tokens[0] == "CACHE":
                     self.cache_size = int(tokens[1])
                 elif tokens[0] == "DB":
-                    DarkDB().path = tokens[1]
+                    self.path = tokens[1]
                 elif tokens[0] == "REMOTE":
                     try:
                         self.remotes.append((tokens[1], int(tokens[2])))
