@@ -100,7 +100,7 @@ class DarkCache(object):
             return data
 
     def search(self, tth, size):
-        DarkTimer().start("search")
+        timer = DarkTimer("search")
         l = [f for f in self.files if f.match(tth, size)]
-        DarkTimer().stop("search")
+        timer.stop()
         return l

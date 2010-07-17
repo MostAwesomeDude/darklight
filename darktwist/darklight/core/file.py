@@ -40,11 +40,11 @@ class DarkFile:
         return True
 
     def hash(self):
-        DarkTimer().start("hashing " + self.path)
+        timer = DarkTimer("hashing " + self.path)
         self.tth = tth.TTH(thex=False, blocksize=self.blocksize)
         self.tth.buildtree(self.path)
         self.dump()
-        DarkTimer().stop("hashing " + self.path)
+        timer.stop()
 
     def update(self):
         if self.dirty:

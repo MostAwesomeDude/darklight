@@ -13,9 +13,9 @@ class DarkServerFactory(twisted.internet.protocol.ServerFactory):
     protocol = DarkServerProtocol
 
     def configure(self, opts):
-        DarkTimer().start("parsing configuration")
+        timer = DarkTimer("parsing configuration")
         self.dc.parse(opts["conf"])
-        DarkTimer().stop("parsing configuration")
+        timer.stop()
         try:
             # XXX stopgap
             raise ImportError
@@ -43,9 +43,9 @@ class DarkServerFactory(twisted.internet.protocol.ServerFactory):
             os.path.walk(folder, self.cache.add, None)
 
         if self.dc.immhash:
-            DarkTimer().start("hashing files offline")
+            timer = DarkTimer("hashing files offline")
             self.cache.update()
-            DarkTimer().stop("hashing files offline")
+            timer.stop()
         else:
             loop = twisted.internet.task.LoopingCall(self.cache.update_single)
             loop.start(1.0)
