@@ -37,7 +37,7 @@ HTTP bears any resemblance to the actual wire protocol of Darklight.
 Darklight's purpose is to provide a cryptographically impenetrable system for
 transferring files of indeterminate size and contents. To this end, the
 protocol has been designed to be secure while also being somewhat
-distributable and hideable.
+distributable and invisible.
 
 Abbreviations
 =============
