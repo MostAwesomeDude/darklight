@@ -136,6 +136,8 @@ Challenges
 ----------
 
 The challenge hash is used by clients to authenticate with servers. The
-challenge should be a hash of the client's password. Let W(plaintext,
-iterations) be the Whirlpool hash function. The hash is defined as W(password,
-(day of the month UTC + 42)).
+challenge should be a hash of the client's password. The hash is defined as
+the Whirlpool HMAC with the password as the pre-shared key and the ASCII
+representation of the UTC day of the month plus 42, as the password. More
+tersely, with W as the Whirlpool HMAC, the challenge is W(password, (day of
+the month UTC + 42)).
