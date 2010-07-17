@@ -1,8 +1,11 @@
 #!/usr/bin/env python
 
 import base64
+import functools
 import os.path
 
+import twisted.internet.protocol
+import twisted.internet.reactor
 import twisted.protocols.basic
 
 from darklight.core import DarkCache, DarkConf, DarkTimer
@@ -20,9 +23,13 @@ def canonicalize_tth(tth):
 
 class DarkServerProtocol(twisted.protocols.basic.LineReceiver):
 
+    authorized = False
+    passthrough = None
+    passthrough_pending = True
+
     def __init__(self):
         print "Protocol created..."
-        self.authorized = False
+        self.passthrough_pending_lines = []
 
     def checkapi(self, tokens):
         self.sendLine("API 1")
@@ -35,6 +42,9 @@ class DarkServerProtocol(twisted.protocols.basic.LineReceiver):
 
     def hai(self, tokens):
         self.authorized = True
+        if self.passthrough:
+            self.passthrough.master = None
+            self.passthrough.transport.loseConnection()
         self.sendLine("OHAI")
 
     def kthnxbai(self, tokens):
@@ -108,10 +118,39 @@ class DarkServerProtocol(twisted.protocols.basic.LineReceiver):
             #print "Error dispatching '%s'" % line
             #self.error()
 
+    def setup_passthrough(self, protocol):
+        self.passthrough = protocol
+        self.passthrough.master = self
+        for line in self.passthrough_pending_lines:
+            self.passthrough.sendLine(line)
+        self.passthrough_pending = False
+
+    def connectionMade(self):
+        creator = twisted.internet.protocol.ClientCreator(
+            twisted.internet.reactor, PassthroughProtocol)
+        creator.connectTCP("www.google.com", 80).addCallback(self.setup_passthrough)
+
+    def connectionLost(self, reason):
+        self.passthrough = None
+
     def lineReceived(self, line):
         print "Received line: %s" % line
-        self.dispatch(line)
+        if self.passthrough_pending:
+            self.passthrough_pending_lines.append(line)
+        elif self.passthrough:
+            self.passthrough.sendLine(line)
+        else:
+            self.dispatch(line)
 
     def sendLine(self, line):
         print "Sending '%s'" % line
         twisted.protocols.basic.LineReceiver.sendLine(self, line)
+
+class PassthroughProtocol(twisted.protocols.basic.LineReceiver):
+
+    def lineReceived(self, line):
+        self.master.sendLine(line)
+
+    def connectionLost(self, reason):
+        if self.master:
+            self.master.transport.loseConnection()
