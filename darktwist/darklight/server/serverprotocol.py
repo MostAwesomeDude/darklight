@@ -8,6 +8,7 @@ import twisted.internet.protocol
 import twisted.internet.reactor
 import twisted.protocols.basic
 
+from darklight.aux import DarkHMAC
 from darklight.core import DarkCache, DarkConf, DarkTimer
 
 # XXX should live somewhere better
@@ -39,13 +40,6 @@ class DarkServerProtocol(twisted.protocols.basic.LineReceiver):
 
     def fail(self, tokens):
         self.transport.loseConnection()
-
-    def hai(self, tokens):
-        self.authorized = True
-        if self.passthrough:
-            self.passthrough.master = None
-            self.passthrough.transport.loseConnection()
-        self.sendLine("OHAI")
 
     def kthnxbai(self, tokens):
         self.sendLine("BAI")
@@ -85,8 +79,8 @@ class DarkServerProtocol(twisted.protocols.basic.LineReceiver):
     def version(self, tokens):
         self.sendLine("Darklight pre-alpha")
 
-    helpers = {"BAI": bai, "CHECKAPI": checkapi, "FAIL": fail, "HAI": hai,
-        "KTHNXBAI": kthnxbai, "SENDPEZE": sendpeze, "VERSION": version}
+    helpers = {"BAI": bai, "CHECKAPI": checkapi, "FAIL": fail, "KTHNXBAI":
+        kthnxbai, "SENDPEZE": sendpeze, "VERSION": version}
 
     def error(self):
         self.sendLine("FAIL")
@@ -96,10 +90,41 @@ class DarkServerProtocol(twisted.protocols.basic.LineReceiver):
         self.sendLine("LOLWUT")
         self.transport.loseConnection()
 
-    def authorize(self, challenge):
-        if challenge.strip() == "HAI":
-            self.authorized = True
-        return self.authorized
+    def challenge(self, challenge):
+        try:
+            hai, passphrase = challenge.strip().split(" ", 1)
+        except ValueError:
+            return False
+
+        if hai != "HAI":
+            return False
+
+        hmac = DarkHMAC("test")
+        if len(passphrase) == 64:
+            # Raw, no munging needed
+            pass
+        elif len(passphrase) == 104:
+            # base32
+            passphrase = base64.b32decode(passphrase)
+        elif len(passphrase) == 128:
+            # Hexlified
+            passphrase = binascii.unhexlify(passphrase)
+        else:
+            return False
+
+        if passphrase != hmac:
+            return False
+
+        self.authorized = True
+        self.pending_passthrough = False
+
+        if self.passthrough:
+            self.passthrough.master = None
+            self.passthrough.transport.loseConnection()
+
+        self.sendLine("OHAI")
+
+        return True
 
     def dispatch(self, line):
         if not self.authorized:
@@ -119,6 +144,10 @@ class DarkServerProtocol(twisted.protocols.basic.LineReceiver):
             #self.error()
 
     def setup_passthrough(self, protocol):
+        if self.authenticated:
+            protocol.transport.loseConnection()
+            return
+
         self.passthrough = protocol
         self.passthrough.master = self
         for line in self.passthrough_pending_lines:
@@ -138,7 +167,9 @@ class DarkServerProtocol(twisted.protocols.basic.LineReceiver):
         if self.passthrough_pending:
             self.passthrough_pending_lines.append(line)
         elif self.passthrough:
-            self.passthrough.sendLine(line)
+            # Check HAI first.
+            if not self.challenge(line):
+                self.passthrough.sendLine(line)
         else:
             self.dispatch(line)
 
