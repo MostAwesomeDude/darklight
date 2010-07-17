@@ -1,3 +1,1 @@
-#!/usr/bin/env python
-
-from hash import DarkHash
+from hash import DarkHMAC
