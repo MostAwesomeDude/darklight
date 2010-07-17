@@ -1,6 +1,16 @@
+import hashlib
 import unittest
 
 import darklight.aux
+
+class WhirlpoolTest(unittest.TestCase):
+
+    def test_builtin(self):
+        strings = "", "The quick brown fox jumps over the lazy dog."
+        for string in strings:
+            self.assertEqual(hashlib.new("whirlpool", string).digest(),
+                darklight.aux.Whirlpool(string).digest())
+
 
 class HMACTest(unittest.TestCase):
 
