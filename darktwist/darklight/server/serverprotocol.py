@@ -22,11 +22,12 @@ def canonicalize_tth(tth):
     else:
         raise ValueError, "Couldn't guess the TTH format"
 
+PASSTHROUGH_PENDING, PASSTHROUGH, AUTHENTICATED = range(3)
+
 class DarkServerProtocol(twisted.protocols.basic.LineReceiver):
 
-    authorized = False
+    state = PASSTHROUGH_PENDING
     passthrough = None
-    passthrough_pending = True
 
     def __init__(self):
         print "Protocol created..."
@@ -115,8 +116,7 @@ class DarkServerProtocol(twisted.protocols.basic.LineReceiver):
         if passphrase != hmac:
             return False
 
-        self.authorized = True
-        self.pending_passthrough = False
+        self.state = AUTHENTICATED
 
         if self.passthrough:
             self.passthrough.master = None
@@ -127,9 +127,8 @@ class DarkServerProtocol(twisted.protocols.basic.LineReceiver):
         return True
 
     def dispatch(self, line):
-        if not self.authorized:
-            if not self.authorize(line):
-                return
+        if self.state != AUTHENTICATED:
+            return
 
         tokens = [i.strip() for i in line.split(' ')]
 
@@ -144,7 +143,7 @@ class DarkServerProtocol(twisted.protocols.basic.LineReceiver):
             #self.error()
 
     def setup_passthrough(self, protocol):
-        if self.authenticated:
+        if self.state != PASSTHROUGH_PENDING:
             protocol.transport.loseConnection()
             return
 
@@ -152,7 +151,8 @@ class DarkServerProtocol(twisted.protocols.basic.LineReceiver):
         self.passthrough.master = self
         for line in self.passthrough_pending_lines:
             self.passthrough.sendLine(line)
-        self.passthrough_pending = False
+
+        self.state = PASSTHROUGH
 
     def connectionMade(self):
         creator = twisted.internet.protocol.ClientCreator(
@@ -164,20 +164,24 @@ class DarkServerProtocol(twisted.protocols.basic.LineReceiver):
 
     def lineReceived(self, line):
         print "Received line: %s" % line
-        if self.passthrough_pending:
+        if self.state == PASSTHROUGH_PENDING:
             self.passthrough_pending_lines.append(line)
-        elif self.passthrough:
+        elif self.state == PASSTHROUGH:
             # Check HAI first.
             if not self.challenge(line):
                 self.passthrough.sendLine(line)
-        else:
+        elif self.state == AUTHENTICATED:
             self.dispatch(line)
+        else:
+            log.debug("Dead code warning: Impossible self.state value!")
 
     def sendLine(self, line):
         print "Sending '%s'" % line
         twisted.protocols.basic.LineReceiver.sendLine(self, line)
 
 class PassthroughProtocol(twisted.protocols.basic.LineReceiver):
+
+    master = None
 
     def lineReceived(self, line):
         self.master.sendLine(line)
