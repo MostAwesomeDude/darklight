@@ -35,3 +35,10 @@ class TestDarkConf(unittest.TestCase):
             tf.flush()
             self.dc.parse(tf.name)
             self.assertEqual(path, self.dc.path)
+
+    def test_ssl(self):
+        with tempfile.NamedTemporaryFile() as tf:
+            tf.write("SSL test.key test.crt")
+            tf.flush()
+            self.dc.parse(tf.name)
+            self.assertTrue(self.dc.ssl)

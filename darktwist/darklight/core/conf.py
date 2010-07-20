@@ -14,6 +14,7 @@ class DarkConf(object):
     cache_size = 10 * 1024 * 1024
     immhash = False
     path = None
+    ssl = False
 
     def __init__(self):
         self.folders = list()
@@ -45,6 +46,13 @@ class DarkConf(object):
                     # "immediate"
                     if tokens[1].startswith("imm"):
                         self.immhash = True
+                elif tokens[0] == "SSL":
+                    # First is private key, second is certificate
+                    try:
+                        self.key, self.cert = tokens[1:3]
+                        self.ssl = True
+                    except IndexError:
+                        logging.warning("Bad SSL config line!")
                 else:
                     logging.warning("Unknown config line, skipping:")
                     logging.warning("\t%s" % line)
