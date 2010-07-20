@@ -3,6 +3,7 @@
 import os
 
 import twisted.internet.protocol
+import twisted.internet.ssl
 import twisted.internet.task
 
 from darklight.core import DarkDB, DarkCache, DarkConf, DarkTimer
@@ -12,10 +13,7 @@ from serverprotocol import DarkServerProtocol
 class DarkServerFactory(twisted.internet.protocol.ServerFactory):
     protocol = DarkServerProtocol
 
-    def configure(self, opts):
-        timer = DarkTimer("parsing configuration")
-        self.dc.parse(opts["conf"])
-        timer.stop()
+    def configure(self):
         try:
             # XXX stopgap
             raise ImportError
@@ -27,9 +25,9 @@ class DarkServerFactory(twisted.internet.protocol.ServerFactory):
             print "Couldn't start inotify thread,"
             print "\ttry installing pyinotify."
 
-    def __init__(self, opts):
-        self.dc = DarkConf()
-        self.configure(opts)
+    def __init__(self, conf):
+        self.dc = conf
+        self.configure()
 
         self.db = DarkDB()
         if self.dc.path:
@@ -49,3 +47,6 @@ class DarkServerFactory(twisted.internet.protocol.ServerFactory):
         else:
             loop = twisted.internet.task.LoopingCall(self.cache.update_single)
             loop.start(1.0)
+
+class DarkSSLFactory(twisted.internet.ssl.DefaultOpenSSLContextFactory):
+    pass

@@ -10,6 +10,7 @@ import twisted.plugin
 import twisted.python.log
 import twisted.python.usage
 
+from darklight.core import DarkConf, DarkTimer
 from darklight.server import DarkServerFactory
 
 logging.basicConfig(loglevel=logging.DEBUG)
@@ -38,7 +39,12 @@ class DarkServiceMaker(object):
     def makeService(self, options):
         twisted.python.log.PythonLoggingObserver().start()
 
+        timer = DarkTimer("parsing configuration")
+        conf = DarkConf()
+        conf.parse(options["conf"])
+        timer.stop()
+
         return twisted.application.internet.TCPServer(
-            int(options["port"]), DarkServerFactory(options))
+            int(options["port"]), DarkServerFactory(conf))
 
 serviceMaker = DarkServiceMaker()
