@@ -49,4 +49,7 @@ class DarkServerFactory(twisted.internet.protocol.ServerFactory):
             loop.start(1.0)
 
 class DarkSSLFactory(twisted.internet.ssl.DefaultOpenSSLContextFactory):
-    pass
+
+    def __init__(self, conf):
+        twisted.internet.ssl.DefaultOpenSSLContextFactory.__init__(
+            self, conf.key, conf.cert)

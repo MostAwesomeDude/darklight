@@ -11,7 +11,7 @@ import twisted.python.log
 import twisted.python.usage
 
 from darklight.core import DarkConf, DarkTimer
-from darklight.server import DarkServerFactory
+from darklight.server import DarkServerFactory, DarkSSLFactory
 
 logging.basicConfig(loglevel=logging.DEBUG)
 
@@ -44,7 +44,12 @@ class DarkServiceMaker(object):
         conf.parse(options["conf"])
         timer.stop()
 
-        return twisted.application.internet.TCPServer(
-            int(options["port"]), DarkServerFactory(conf))
+        if conf.ssl:
+            return twisted.application.internet.SSLServer(
+                int(options["port"]), DarkServerFactory(conf),
+                DarkSSLFactory(conf))
+        else:
+            return twisted.application.internet.TCPServer(
+                int(options["port"]), DarkServerFactory(conf))
 
 serviceMaker = DarkServiceMaker()
