@@ -153,11 +153,12 @@ class DarkServerProtocol(twisted.protocols.basic.LineReceiver):
             self.passthrough.sendLine(line)
 
         self.state = PASSTHROUGH
+        print "Switched to passthrough mode"
 
     def connectionMade(self):
         creator = twisted.internet.protocol.ClientCreator(
             twisted.internet.reactor, PassthroughProtocol)
-        creator.connectTCP("www.google.com", 80).addCallback(self.setup_passthrough)
+        creator.connectTCP("localhost", 80).addCallback(self.setup_passthrough)
 
     def connectionLost(self, reason):
         self.passthrough = None
@@ -173,7 +174,7 @@ class DarkServerProtocol(twisted.protocols.basic.LineReceiver):
         elif self.state == AUTHENTICATED:
             self.dispatch(line)
         else:
-            log.debug("Dead code warning: Impossible self.state value!")
+            print "Dead code warning: Impossible self.state value!"
 
     def sendLine(self, line):
         print "Sending '%s'" % line
