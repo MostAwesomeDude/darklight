@@ -41,10 +41,10 @@ class DarkServiceMaker(object):
 
         timer = DarkTimer("parsing configuration")
         conf = DarkConf()
-        conf.parser.read(options["conf"])
+        conf.read(options["conf"])
         timer.stop()
 
-        if conf.parser.getboolean("ssl", "enabled"):
+        if conf.getboolean("ssl", "enabled"):
             return twisted.application.internet.SSLServer(
                 int(options["port"]), DarkServerFactory(conf),
                 DarkSSLFactory(conf))

@@ -9,26 +9,26 @@ from db import DarkDB
 import logging
 logging.basicConfig(level=logging.DEBUG)
 
-def populate(parser):
-    """Load the default settings."""
-
-    parser.add_section("cache")
-    parser.set("cache", "size", str(10 * 1024 * 1024))
-    parser.set("cache", "hash-style", "lazy")
-
-    parser.add_section("database")
-    parser.set("database", "path", "darklight.db")
-
-    parser.add_section("folders")
-
-    parser.add_section("ssl")
-    parser.set("ssl", "enabled", str(False))
-    parser.set("ssl", "key", "")
-    parser.set("ssl", "certificate", "")
-
-class DarkConf(object):
+class DarkConf(ConfigParser.SafeConfigParser):
     """An object that parses configuration."""
 
     def __init__(self):
-        self.parser = ConfigParser.SafeConfigParser()
-        populate(self.parser)
+        ConfigParser.SafeConfigParser.__init__(self)
+        self.populate()
+
+    def populate(self):
+        """Load the default settings."""
+
+        self.add_section("cache")
+        self.set("cache", "size", str(10 * 1024 * 1024))
+        self.set("cache", "hash-style", "lazy")
+
+        self.add_section("database")
+        self.set("database", "path", "darklight.db")
+
+        self.add_section("folders")
+
+        self.add_section("ssl")
+        self.set("ssl", "enabled", str(False))
+        self.set("ssl", "key", "")
+        self.set("ssl", "certificate", "")

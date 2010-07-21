@@ -30,16 +30,16 @@ class DarkServerFactory(twisted.internet.protocol.ServerFactory):
         self.configure()
 
         self.db = DarkDB()
-        self.db.path = self.dc.parser.get("database", "path")
+        self.db.path = self.dc.get("database", "path")
         self.db.connect()
 
-        self.cache = DarkCache(self.dc.parser.getint("cache", "size"))
+        self.cache = DarkCache(self.dc.getint("cache", "size"))
         self.cache.db = self.db
 
-        for folder, none in self.dc.parser.items("folders"):
+        for folder, none in self.dc.items("folders"):
             os.path.walk(folder, self.cache.add, None)
 
-        if self.dc.parser.get("cache", "hash-style").startswith("imm"):
+        if self.dc.get("cache", "hash-style").startswith("imm"):
             timer = DarkTimer("hashing files offline")
             self.cache.update()
             timer.stop()
