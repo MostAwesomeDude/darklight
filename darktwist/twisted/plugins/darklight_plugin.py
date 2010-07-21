@@ -37,14 +37,14 @@ class DarkServiceMaker(object):
     options = Options
 
     def makeService(self, options):
-        twisted.python.log.PythonLoggingObserver().start()
+        # twisted.python.log.PythonLoggingObserver().start()
 
         timer = DarkTimer("parsing configuration")
         conf = DarkConf()
-        conf.parse(options["conf"])
+        conf.parser.read(options["conf"])
         timer.stop()
 
-        if conf.ssl:
+        if conf.parser.getboolean("ssl", "enabled"):
             return twisted.application.internet.SSLServer(
                 int(options["port"]), DarkServerFactory(conf),
                 DarkSSLFactory(conf))

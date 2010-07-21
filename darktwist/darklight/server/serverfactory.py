@@ -30,17 +30,16 @@ class DarkServerFactory(twisted.internet.protocol.ServerFactory):
         self.configure()
 
         self.db = DarkDB()
-        if self.dc.path:
-            self.db.path = self.dc.path
+        self.db.path = self.dc.parser.get("database", "path")
         self.db.connect()
 
-        self.cache = DarkCache(self.dc.cache_size)
+        self.cache = DarkCache(self.dc.parser.getint("cache", "size"))
         self.cache.db = self.db
 
-        for folder in self.dc.folders:
+        for folder, none in self.dc.parser.items("folders"):
             os.path.walk(folder, self.cache.add, None)
 
-        if self.dc.immhash:
+        if self.dc.parser.get("cache", "hash-style").startswith("imm"):
             timer = DarkTimer("hashing files offline")
             self.cache.update()
             timer.stop()
@@ -52,4 +51,4 @@ class DarkSSLFactory(twisted.internet.ssl.DefaultOpenSSLContextFactory):
 
     def __init__(self, conf):
         twisted.internet.ssl.DefaultOpenSSLContextFactory.__init__(
-            self, conf.key, conf.cert)
+            self, conf.get("ssl", "key"), conf.get("ssl", "certificate"))
