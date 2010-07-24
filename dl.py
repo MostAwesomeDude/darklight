@@ -11,15 +11,25 @@ introduction = """
 Welcome to the DarkLight client shell!
 """
 
-def help():
+def help(*args):
     """
-    Print a summary of all available commands.
+    Print a summary of all available commands, or get help on a specific
+    command.
+
+    Usage: help [command]
     """
 
-    for name, function in sorted(commands.iteritems()):
-        print "%s: %s" % (name, function.__doc__)
+    if args:
+        for arg in args:
+            if arg in commands:
+                print "%s: %s" % (arg, commands[arg].__doc__)
+            else:
+                print "Unknown command %s" % arg
+    else:
+        for name, function in sorted(commands.iteritems()):
+            print "%s: %s" % (name, function.__doc__)
 
-def quit():
+def quit(*args):
     """
     Quit DL.
     """
@@ -28,6 +38,7 @@ def quit():
     twisted.internet.reactor.stop()
 
 commands = {
+    "exit": quit,
     "help": help,
     "quit": quit,
 }
