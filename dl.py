@@ -3,13 +3,39 @@
 import readline
 import sys
 
+import twisted.internet.protocol
 import twisted.internet.reactor
+import twisted.internet.ssl
 
-from darklight.client import DarkClientFactory
+from darklight.client import DarkClientProtocol
 
 introduction = """
 Welcome to the DarkLight client shell!
 """
+
+remotes = set()
+
+def connected(protocol):
+    protocol.sendLine("HAI")
+
+def connect(*args):
+    """
+    Connect to a remote DL server.
+
+    Usage: connect <host> <port> [psk]
+    """
+
+    if len(args) < 2:
+        print "At least a host and port are required."
+        return
+
+    host, port = args[0], args[1]
+    psk = "".join(args[2:])
+
+    cc = twisted.internet.protocol.ClientCreator(twisted.internet.reactor,
+        DarkClientProtocol)
+    d = cc.connectSSL(host, port, twisted.internet.ssl.ClientContextFactory())
+    d.addCallback(connected)
 
 def help(*args):
     """
@@ -38,6 +64,7 @@ def quit(*args):
     twisted.internet.reactor.stop()
 
 commands = {
+    "connect": connect,
     "exit": quit,
     "help": help,
     "quit": quit,
