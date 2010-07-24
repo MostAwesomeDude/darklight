@@ -11,11 +11,26 @@ introduction = """
 Welcome to the DarkLight client shell!
 """
 
+def help():
+    """
+    Print a summary of all available commands.
+    """
+
+    for name, function in sorted(commands.iteritems()):
+        print "%s: %s" % (name, function.__doc__)
+
 def quit():
+    """
+    Quit DL.
+    """
+
     print "Halting the reactor..."
     twisted.internet.reactor.stop()
 
-commands = {"quit": quit}
+commands = {
+    "help": help,
+    "quit": quit,
+}
 
 def mainloop():
     command = raw_input("dl> ")
