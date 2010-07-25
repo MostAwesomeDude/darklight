@@ -13,11 +13,12 @@ def deserialize(string, length):
     if len(string) == length:
         return string
     elif len(string) == length * 2:
-        # Hexlified
-        return binascii.unhexlify(string)
-    elif abs(len(string) / 8 - length / 6) <= 1:
-        return base64.b64decode(string)
-    elif abs(len(string) / 8 - length / 5) <= 1:
+        # Hexlified?
+        try:
+            return binascii.unhexlify(string)
+        except TypeError:
+            return base64.b32decode(string)
+    elif len(string) / 8 == (length + 4) // 5:
         return base64.b32decode(string)
     else:
         raise ValueError, "Couldn't guess how to deserialize %s" % string
