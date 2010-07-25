@@ -40,6 +40,11 @@ def connect(widget):
 
     print "Connecting to %s:%d" % (host, port)
 
+    factory = DarkClientFactory()
+
+    twisted.internet.reactor.connectSSL(host, port, factory,
+        twisted.internet.ssl.ClientContextFactory())
+
 main = gui.get_widget("main")
 
 gui.signal_connect("on_connect_clicked", connect)
