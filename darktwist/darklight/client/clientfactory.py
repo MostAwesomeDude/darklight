@@ -9,12 +9,7 @@ class DarkClientFactory(twisted.internet.protocol.ClientFactory):
 
     protocol = DarkClientProtocol
 
-    def __init__(self):
-        self.connection = None
+    new_connection_handler = None
 
-    def buildProtocol(self, addr):
-        if self.connection:
-            print "Tried to create two connections, not supported"
-        else:
-            self.connection = twisted.internet.protocol.ClientFactory.buildProtocol(self, addr)
-            return self.connection
+    def __init__(self):
+        self.connections = set()

@@ -21,34 +21,47 @@ def error(message):
     dialog.run()
     dialog.destroy()
 
-def connect(widget):
-    host = gui.get_widget("host").get_property("text")
-    port = gui.get_widget("port").get_property("text")
+class ClientLogic(object):
 
-    if not host:
-        error("No host specified!")
-        return
-    elif not port:
-        error("No port specified!")
-        return
+    def __init__(self):
+        self.connections = set()
+        self.factory = DarkClientFactory()
 
-    try:
-        port = int(port)
-    except ValueError:
-        error("Port must be a number!")
-        return
+        self.factory.new_connection_handler = self.connected_callback
 
-    print "Connecting to %s:%d" % (host, port)
+    def setup_signals(self, gui):
+        gui.signal_connect("on_connect_clicked", self.connect)
 
-    factory = DarkClientFactory()
+    def connect(self, widget):
+        host = gui.get_widget("host").get_property("text")
+        port = gui.get_widget("port").get_property("text")
 
-    twisted.internet.reactor.connectSSL(host, port, factory,
-        twisted.internet.ssl.ClientContextFactory())
+        if not host:
+            error("No host specified!")
+            return
+        elif not port:
+            error("No port specified!")
+            return
+
+        try:
+            port = int(port)
+        except ValueError:
+            error("Port must be a number!")
+            return
+
+        print "Connecting to %s:%d" % (host, port)
+
+        twisted.internet.reactor.connectTCP(host, port, self.factory, 5)
+
+    def connected_callback(self, protocol):
+        print "Connected successfully!"
+
+        self.connections.add(protocol)
+
+logic = ClientLogic()
+logic.setup_signals(gui)
 
 main = gui.get_widget("main")
-
-gui.signal_connect("on_connect_clicked", connect)
-
 main.show()
 
 twisted.internet.reactor.run()

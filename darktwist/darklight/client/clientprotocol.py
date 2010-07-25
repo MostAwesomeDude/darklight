@@ -10,10 +10,14 @@ class DarkClientProtocol(twisted.protocols.basic.LineReceiver):
         self.rawhandler = None
 
     def connectionMade(self):
-        pass
+        print "Made connection!"
+        if self.factory.new_connection_handler:
+            self.factory.new_connection_handler(self)
+        self.factory.connections.add(self)
 
     def connectionLost(self, reason):
-        pass
+        print "Lost connection!"
+        self.factory.connections.discard(self)
 
     def dispatch(self, line):
         try:
