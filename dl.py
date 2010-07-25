@@ -1,96 +1,49 @@
 #!/usr/bin/env python
 
-import readline
-import sys
-
 import twisted.internet.protocol
+import twisted.internet.gtk2reactor
+twisted.internet.gtk2reactor.install()
 import twisted.internet.reactor
 import twisted.internet.ssl
 
-from darklight.client import DarkClientProtocol
+import pygtk
+pygtk.require("2.0")
+import gtk
+import gtk.glade
 
-introduction = """
-Welcome to the DarkLight client shell!
-"""
+from darklight.client import DarkClientFactory
 
-remotes = set()
+gui = gtk.glade.XML("gui.glade")
 
-def connected(protocol):
-    protocol.sendLine("HAI")
+def error(message):
+    dialog = gtk.MessageDialog(main, gtk.DIALOG_MODAL, gtk.MESSAGE_ERROR,
+        gtk.BUTTONS_OK, message)
+    dialog.run()
+    dialog.destroy()
 
-def connect(*args):
-    """
-    Connect to a remote DL server.
+def connect(widget):
+    host = gui.get_widget("host").get_property("text")
+    port = gui.get_widget("port").get_property("text")
 
-    Usage: connect <host> <port> [psk]
-    """
-
-    if len(args) < 2:
-        print "At least a host and port are required."
+    if not host:
+        error("No host specified!")
+        return
+    elif not port:
+        error("No port specified!")
         return
 
-    host, port = args[0], args[1]
-    psk = "".join(args[2:])
-
-    cc = twisted.internet.protocol.ClientCreator(twisted.internet.reactor,
-        DarkClientProtocol)
-    d = cc.connectSSL(host, port, twisted.internet.ssl.ClientContextFactory())
-    d.addCallback(connected)
-
-def help(*args):
-    """
-    Print a summary of all available commands, or get help on a specific
-    command.
-
-    Usage: help [command]
-    """
-
-    if args:
-        for arg in args:
-            if arg in commands:
-                print "%s: %s" % (arg, commands[arg].__doc__)
-            else:
-                print "Unknown command %s" % arg
-    else:
-        for name, function in sorted(commands.iteritems()):
-            print "%s: %s" % (name, function.__doc__)
-
-def quit(*args):
-    """
-    Quit DL.
-    """
-
-    print "Halting the reactor..."
-    twisted.internet.reactor.stop()
-
-commands = {
-    "connect": connect,
-    "exit": quit,
-    "help": help,
-    "quit": quit,
-}
-
-def mainloop():
-    command = raw_input("dl> ")
     try:
-        command, arguments = command.split(" ", 1)
-        arguments = arguments.split(" ")
+        port = int(port)
     except ValueError:
-        arguments = tuple()
+        error("Port must be a number!")
+        return
 
-    if command in commands:
-        commands[command](*arguments)
+    print "Connecting to %s:%d" % (host, port)
 
-    twisted.internet.reactor.callLater(0, mainloop)
+main = gui.get_widget("main")
 
-def main():
+gui.signal_connect("on_connect_clicked", connect)
 
-    print introduction
+main.show()
 
-    twisted.internet.reactor.callWhenRunning(mainloop)
-    twisted.internet.reactor.run()
-
-    sys.exit()
-
-if __name__ == "__main__":
-    main()
+twisted.internet.reactor.run()
