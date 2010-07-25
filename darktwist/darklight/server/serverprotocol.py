@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 
-import base64
 import functools
 import os.path
 
@@ -8,19 +7,8 @@ import twisted.internet.protocol
 import twisted.internet.reactor
 import twisted.protocols.basic
 
-from darklight.aux import DarkHMAC
+from darklight.aux import DarkHMAC, util
 from darklight.core import DarkCache, DarkConf, DarkTimer
-
-# XXX should live somewhere better
-def canonicalize_tth(tth):
-    if len(tth) == 48:
-        return binascii.unhexlify(tth)
-    elif len(tth) == 40:
-        return base64.b32decode(tth)
-    elif len(tth) == 24:
-        return tth
-    else:
-        raise ValueError, "Couldn't guess the TTH format"
 
 PASSTHROUGH_PENDING, PASSTHROUGH, AUTHENTICATED = range(3)
 
@@ -56,7 +44,7 @@ class DarkServerProtocol(twisted.protocols.basic.LineReceiver):
 
         try:
             h, size, piece = tokens
-            h = canonicalize_tth(h)
+            h = util.deserialize(h, 24)
             size = int(size)
             piece = int(piece)
         except ValueError:
@@ -101,16 +89,9 @@ class DarkServerProtocol(twisted.protocols.basic.LineReceiver):
             return False
 
         hmac = DarkHMAC("test")
-        if len(passphrase) == 64:
-            # Raw, no munging needed
-            pass
-        elif len(passphrase) == 104:
-            # base32
-            passphrase = base64.b32decode(passphrase)
-        elif len(passphrase) == 128:
-            # Hexlified
-            passphrase = binascii.unhexlify(passphrase)
-        else:
+        try:
+            passphrase = util.deserialize(passphrase, len(hmac))
+        except ValueError:
             return False
 
         if passphrase != hmac:
