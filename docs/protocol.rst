@@ -132,6 +132,10 @@ OHAI
 Hashes
 ======
 
+On the wire, hashes should generally be either unencoded, or base32-encoded.
+The only encodings servers are required to support are raw (unencoded),
+base32-encoded, and base16-encoded (ASCII hexadecimal).
+
 Challenges
 ----------
 
@@ -141,3 +145,9 @@ the Whirlpool HMAC with the password as the pre-shared key and the ASCII
 representation of the UTC day of the month plus 42, as the password. More
 tersely, with W as the Whirlpool HMAC, the challenge is W(password, (day of
 the month UTC + 42)).
+
+TTH
+---
+
+For file hashes, the Tiger Tree Hash is used. THEX-style TTHs are currently
+used, although other block sizes might be added later.
