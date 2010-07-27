@@ -24,13 +24,13 @@ class TestDarkConf(unittest.TestCase):
         self.dc = darklight.core.DarkConf()
 
     def test_conf(self):
-        self.dc.parser.readfp(testconf)
-        self.assertEqual(self.dc.parser.getint("cache", "size"), 1000)
-        self.assertEqual(self.dc.parser.get("cache", "hash_style"),
+        self.dc.readfp(testconf)
+        self.assertEqual(self.dc.getint("cache", "size"), 1000)
+        self.assertEqual(self.dc.get("cache", "hash_style"),
             "immediate")
 
-        self.assertEqual(self.dc.parser.get("database", "path"), "test.db")
+        self.assertEqual(self.dc.get("database", "path"), "test.db")
 
-        self.assertTrue(self.dc.parser.getboolean("ssl", "enabled"))
-        self.assertEqual(self.dc.parser.get("ssl", "key"), "test.key")
-        self.assertEqual(self.dc.parser.get("ssl", "certificate"), "test.crt")
+        self.assertTrue(self.dc.getboolean("ssl", "enabled"))
+        self.assertEqual(self.dc.get("ssl", "key"), "test.key")
+        self.assertEqual(self.dc.get("ssl", "certificate"), "test.crt")
