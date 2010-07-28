@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+import base64
+
 import twisted.internet.defer
 import twisted.protocols.basic
 
@@ -37,7 +39,7 @@ class DarkClientProtocol(twisted.protocols.basic.LineReceiver):
     def hai(self, passphrase=None):
         print "Shaking..."
         if passphrase:
-            hmac = DarkHMAC(passphrase)
+            hmac = base64.b32encode(DarkHMAC(passphrase))
             self.sendLine("HAI %s" % hmac)
         else:
             self.sendLine("HAI")
