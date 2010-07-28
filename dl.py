@@ -50,11 +50,13 @@ class ClientLogic(object):
         self.server_list = gtk.ListStore(str, str)
         server_view = self.gui.get_widget("server-view")
         server_view.set_model(self.server_list)
+        server_view.set_reorderable(True)
 
-        for name in ("Protocol", "meh?"):
+        for i, name in enumerate(("Protocol", "meh?")):
             column = gtk.TreeViewColumn(name)
             cell = gtk.CellRendererText()
-            column.pack_start(cell)
+            column.pack_start(cell, True)
+            column.add_attribute(cell, "text", i)
             server_view.append_column(column)
 
         self.update_servers()
@@ -93,10 +95,16 @@ class ClientLogic(object):
         self.update_servers()
 
     def update_servers(self):
+        for t in self.server_list:
+            print t, list(t)
+
         self.server_list.clear()
 
         for connection in self.connections:
             self.server_list.append([str(connection), "meh"])
+
+        for t in self.server_list:
+            print t, list(t)
 
 logic = ClientLogic(gui)
 logic.setup_signals()
