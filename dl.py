@@ -11,7 +11,7 @@ pygtk.require("2.0")
 import gtk
 import gtk.glade
 
-from darklight.client import DarkClientFactory
+from darklight.client import DarkClientProtocol
 
 gui = gtk.glade.XML("gui.glade")
 
@@ -23,25 +23,28 @@ def error(message):
 
 class ClientLogic(object):
 
-    def __init__(self):
-        self.connections = set()
-        self.factory = DarkClientFactory()
-        self.factory.new_connection_handler = self.connected_callback
+    def __init__(self, gui):
+        self.gui = gui
 
-        self.status_context = gui.get_widget("statusbar").get_context_id("")
+        self.connections = set()
+        self.cc = twisted.internet.protocol.ClientCreator(
+            twisted.internet.reactor, DarkClientProtocol)
+
+        statusbar = self.gui.get_widget("statusbar")
+        self.status_context = statusbar.get_context_id("")
 
     def set_status(self, message):
-        gui.get_widget("statusbar").pop(self.status_context)
-        gui.get_widget("statusbar").push(self.status_context, message)
+        self.gui.get_widget("statusbar").pop(self.status_context)
+        self.gui.get_widget("statusbar").push(self.status_context, message)
 
-    def setup_signals(self, gui):
-        gui.signal_connect("on_main_delete_event", gtk.main_quit)
+    def setup_signals(self):
+        self.gui.signal_connect("on_main_delete_event", gtk.main_quit)
 
-        gui.signal_connect("on_connect_clicked", self.connect)
+        self.gui.signal_connect("on_connect_clicked", self.connect)
 
     def connect(self, widget):
-        host = gui.get_widget("host").get_property("text")
-        port = gui.get_widget("port").get_property("text")
+        host = self.gui.get_widget("host").get_property("text")
+        port = self.gui.get_widget("port").get_property("text")
 
         if not host:
             error("No host specified!")
@@ -58,15 +61,16 @@ class ClientLogic(object):
 
         self.set_status("Connecting to %s:%d" % (host, port))
 
-        twisted.internet.reactor.connectTCP(host, port, self.factory, 5)
+        d = self.cc.connectTCP(host, port, 5)
+        d.addCallback(self.connected_callback)
 
     def connected_callback(self, protocol):
         self.set_status("Connected successfully!")
 
         self.connections.add(protocol)
 
-logic = ClientLogic()
-logic.setup_signals(gui)
+logic = ClientLogic(gui)
+logic.setup_signals()
 
 main = gui.get_widget("main")
 main.show()
