@@ -98,6 +98,7 @@ class ClientLogic(object):
         self.set_status("Connected successfully!")
 
         self.connections.add(protocol)
+        protocol.authorize("test")
         self.update_servers()
 
     def update_servers(self):

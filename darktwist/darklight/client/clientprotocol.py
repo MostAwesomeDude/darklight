@@ -2,6 +2,8 @@
 
 import twisted.protocols.basic
 
+from darklight.aux import DarkHMAC
+
 class DarkClientProtocol(twisted.protocols.basic.LineReceiver):
 
     def __init__(self):
@@ -30,9 +32,13 @@ class DarkClientProtocol(twisted.protocols.basic.LineReceiver):
             self.otwerr("Received non-numeric in numeric field.")
             self.otwerr("Line: %s" % line)
 
-    def authorize(self):
+    def authorize(self, passphrase=None):
         print "Shaking..."
-        self.sendLine("HAI")
+        if passphrase:
+            hmac = DarkHMAC(passphrase)
+            self.sendLine("HAI %s" % hmac)
+        else:
+            self.sendLine("HAI")
 
     def otwerr(self, message):
         print "On-the-wire error: %s" % message
@@ -43,6 +49,9 @@ class DarkClientProtocol(twisted.protocols.basic.LineReceiver):
     
     def ohai(self, tokens):
         self.authenticated = True
+
+    def lineReceived(self, line):
+        self.dispatch(line)
 
     def rawDataRecieved(self, data):
         self.rawbuf += data
