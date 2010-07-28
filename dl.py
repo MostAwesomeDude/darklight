@@ -98,7 +98,13 @@ class ClientLogic(object):
         self.set_status("Connected successfully!")
 
         self.connections.add(protocol)
-        protocol.authorize("test")
+        d = protocol.hai("test")
+        d.addCallback(self.authorized_callback)
+        self.update_servers()
+
+    def authorized_callback(self, protocol):
+        self.set_status("Authorized successfully!")
+
         self.update_servers()
 
     def update_servers(self):
