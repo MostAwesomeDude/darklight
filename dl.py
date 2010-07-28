@@ -35,6 +35,8 @@ class ClientLogic(object):
         gui.get_widget("statusbar").push(self.status_context, message)
 
     def setup_signals(self, gui):
+        gui.signal_connect("on_main_delete_event", gtk.main_quit)
+
         gui.signal_connect("on_connect_clicked", self.connect)
 
     def connect(self, widget):
