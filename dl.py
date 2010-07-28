@@ -32,6 +32,9 @@ class ClientLogic(object):
 
         statusbar = self.gui.get_widget("statusbar")
         self.status_context = statusbar.get_context_id("")
+        self.set_status("Welcome to DarkLight!")
+
+        self.setup_servers()
 
     def quit(self, window, event):
         for connection in self.connections:
@@ -42,6 +45,19 @@ class ClientLogic(object):
     def set_status(self, message):
         self.gui.get_widget("statusbar").pop(self.status_context)
         self.gui.get_widget("statusbar").push(self.status_context, message)
+
+    def setup_servers(self):
+        self.server_list = gtk.ListStore(str, str)
+        server_view = self.gui.get_widget("server-view")
+        server_view.set_model(self.server_list)
+
+        for name in ("Protocol", "meh?"):
+            column = gtk.TreeViewColumn(name)
+            cell = gtk.CellRendererText()
+            column.pack_start(cell)
+            server_view.append_column(column)
+
+        self.update_servers()
 
     def setup_signals(self):
         self.gui.signal_connect("on_main_delete_event", self.quit)
@@ -74,6 +90,13 @@ class ClientLogic(object):
         self.set_status("Connected successfully!")
 
         self.connections.add(protocol)
+        self.update_servers()
+
+    def update_servers(self):
+        self.server_list.clear()
+
+        for connection in self.connections:
+            self.server_list.append([str(connection), "meh"])
 
 logic = ClientLogic(gui)
 logic.setup_signals()
