@@ -24,10 +24,11 @@ class DarkClientProtocol(twisted.protocols.basic.LineReceiver):
             else:
                 print "Dispatching '%s'" % line
                 tokens = [i.strip() for i in line.split(' ')]
-                self.helpers[tokens[0]](self, tokens[1:])
-        except KeyError:
-            self.otwerr("Unknown command '%s'" % tokens[0])
-            self.otwerr("Line: %s" % line)
+                if tokens[0] in self.helpers:
+                    self.helpers[tokens[0]](self, tokens[1:])
+                else:
+                    self.otwerr("Unknown command '%s'" % tokens[0])
+                    self.otwerr("Line: %s" % line)
         except ValueError:
             self.otwerr("Received non-numeric in numeric field.")
             self.otwerr("Line: %s" % line)
