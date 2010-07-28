@@ -21,10 +21,10 @@ def error(message):
     dialog.run()
     dialog.destroy()
 
-server_columns = {
-    "Protocol": str,
-    "Status": str,
-};
+server_columns = [
+    ("Protocol", str),
+    ("Status", str),
+]
 
 class ClientLogic(object):
 
@@ -52,7 +52,7 @@ class ClientLogic(object):
         self.gui.get_widget("statusbar").push(self.status_context, message)
 
     def setup_servers(self):
-        column_names, column_types = zip(*server_columns.items())
+        column_names, column_types = zip(*server_columns)
         self.server_list = gtk.ListStore(*column_types)
         server_view = self.gui.get_widget("server-view")
         server_view.set_model(self.server_list)
