@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import twisted.internet.defer
 import twisted.protocols.basic
 
 from darklight.aux import DarkHMAC
@@ -33,13 +34,16 @@ class DarkClientProtocol(twisted.protocols.basic.LineReceiver):
             self.otwerr("Received non-numeric in numeric field.")
             self.otwerr("Line: %s" % line)
 
-    def authorize(self, passphrase=None):
+    def hai(self, passphrase=None):
         print "Shaking..."
         if passphrase:
             hmac = DarkHMAC(passphrase)
             self.sendLine("HAI %s" % hmac)
         else:
             self.sendLine("HAI")
+
+        self.authentication_deferred = twisted.internet.defer.Deferred()
+        return self.authentication_deferred
 
     def otwerr(self, message):
         print "On-the-wire error: %s" % message
@@ -50,6 +54,9 @@ class DarkClientProtocol(twisted.protocols.basic.LineReceiver):
     
     def ohai(self, tokens):
         self.authenticated = True
+
+        twisted.internet.reactor.callLater(0,
+            self.authentication_deferred.callback, self)
 
     def lineReceived(self, line):
         self.dispatch(line)
