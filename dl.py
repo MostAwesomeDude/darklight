@@ -21,6 +21,11 @@ def error(message):
     dialog.run()
     dialog.destroy()
 
+server_columns = {
+    "Protocol": str,
+    "Status": str,
+};
+
 class ClientLogic(object):
 
     def __init__(self, gui):
@@ -47,12 +52,13 @@ class ClientLogic(object):
         self.gui.get_widget("statusbar").push(self.status_context, message)
 
     def setup_servers(self):
-        self.server_list = gtk.ListStore(str, str)
+        column_names, column_types = zip(*server_columns.items())
+        self.server_list = gtk.ListStore(*column_types)
         server_view = self.gui.get_widget("server-view")
         server_view.set_model(self.server_list)
         server_view.set_reorderable(True)
 
-        for i, name in enumerate(("Protocol", "meh?")):
+        for i, name in enumerate(column_names):
             column = gtk.TreeViewColumn(name)
             cell = gtk.CellRendererText()
             column.pack_start(cell, True)
@@ -95,16 +101,13 @@ class ClientLogic(object):
         self.update_servers()
 
     def update_servers(self):
-        for t in self.server_list:
-            print t, list(t)
-
         self.server_list.clear()
 
         for connection in self.connections:
-            self.server_list.append([str(connection), "meh"])
-
-        for t in self.server_list:
-            print t, list(t)
+            l = [str(connection)]
+            l.append("Authenticated" if connection.authenticated
+                else "Unauthenticated")
+            self.server_list.append(l)
 
 logic = ClientLogic(gui)
 logic.setup_signals()

@@ -5,7 +5,7 @@ import twisted.protocols.basic
 class DarkClientProtocol(twisted.protocols.basic.LineReceiver):
 
     def __init__(self):
-        self.authorized = False
+        self.authenticated = False
         self.linehandler = None
         self.rawhandler = None
 
@@ -42,7 +42,7 @@ class DarkClientProtocol(twisted.protocols.basic.LineReceiver):
         self.setRawMode()
     
     def ohai(self, tokens):
-        self.authorized = True
+        self.authenticated = True
 
     def rawDataRecieved(self, data):
         self.rawbuf += data
