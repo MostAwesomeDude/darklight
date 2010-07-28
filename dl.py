@@ -33,12 +33,18 @@ class ClientLogic(object):
         statusbar = self.gui.get_widget("statusbar")
         self.status_context = statusbar.get_context_id("")
 
+    def quit(self, window, event):
+        for connection in self.connections:
+            connection.transport.loseConnection()
+
+        twisted.internet.reactor.stop()
+
     def set_status(self, message):
         self.gui.get_widget("statusbar").pop(self.status_context)
         self.gui.get_widget("statusbar").push(self.status_context, message)
 
     def setup_signals(self):
-        self.gui.signal_connect("on_main_delete_event", gtk.main_quit)
+        self.gui.signal_connect("on_main_delete_event", self.quit)
 
         self.gui.signal_connect("on_connect_clicked", self.connect)
 
