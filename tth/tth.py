@@ -4,6 +4,7 @@
 
 import base64
 import math
+import os
 
 import tiger
 
@@ -31,11 +32,11 @@ class TTH:
             h = open(f, "rb")
             leaves = []
             buf = h.read(self.blocksize)
-                while len(buf):
-                    if self.thex:
-                        buf = '\x00' + buf
-                    leaves.append(tiger.tiger(buf).digest())
-                    buf = h.read(self.blocksize)
+            while len(buf):
+                if self.thex:
+                    buf = '\x00' + buf
+                leaves.append(tiger.tiger(buf).digest())
+                buf = h.read(self.blocksize)
             h.close()
         else:
             # File is empty, special-case hash
