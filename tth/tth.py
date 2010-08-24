@@ -8,80 +8,80 @@ import math
 import tiger
 
 class TTH:
-	"""A class describing a Tiger Tree Hash tree."""
+    """A class describing a Tiger Tree Hash tree."""
 
-	def __init__(self, filename=None, thex=True, maxlevels=0, blocksize=1024):
-		self.inited = False
-		self.thex = thex
-		self.maxlevels = maxlevels
-		if self.thex:
-			self.blocksize = 1024
-		else:
-			self.blocksize = blocksize
-		if filename:
-			self.buildtree(filename)
+    def __init__(self, filename=None, thex=True, maxlevels=0, blocksize=1024):
+        self.inited = False
+        self.thex = thex
+        self.maxlevels = maxlevels
+        if self.thex:
+            self.blocksize = 1024
+        else:
+            self.blocksize = blocksize
+        if filename:
+            self.buildtree(filename)
 
-	def buildtree(self, f):
-		"""Build the tree."""
+    def buildtree(self, f):
+        """Build the tree."""
 
-		if self.inited:
-			return
+        if self.inited:
+            return
 
-		h = open(f, "rb")
-		leaves = []
-		# Need to read once, to figure out if file's empty.
-		# This part is really lame.
-		buf = h.read(self.blocksize)
-		if not len(buf):
-			if self.thex:
-				leaves.append(tiger.tiger("\x00").digest())
-			else:
-				leaves.append(tiger.tiger("").digest())
-		else:
-			while len(buf):
-				if self.thex:
-					buf = '\x00' + buf
-				leaves.append(tiger.tiger(buf).digest())
-				buf = h.read(self.blocksize)
+        h = open(f, "rb")
+        leaves = []
+        # Need to read once, to figure out if file's empty.
+        # This part is really lame.
+        buf = h.read(self.blocksize)
+        if not len(buf):
+            if self.thex:
+                leaves.append(tiger.tiger("\x00").digest())
+            else:
+                leaves.append(tiger.tiger("").digest())
+        else:
+            while len(buf):
+                if self.thex:
+                    buf = '\x00' + buf
+                leaves.append(tiger.tiger(buf).digest())
+                buf = h.read(self.blocksize)
 
-		h.close()
+        h.close()
 
-		self.levels = int(math.ceil(math.log(len(leaves),2)))
-		self.level = [leaves]
+        self.levels = int(math.ceil(math.log(len(leaves),2)))
+        self.level = [leaves]
 
-		for i in range(self.levels):
-			l = []
+        for i in range(self.levels):
+            l = []
 
-			for j in range(len(self.level[i])):
+            for j in range(len(self.level[i])):
 
-				if j % 2:
-					continue
-	
-				try:
-					buf = self.level[i][j] + self.level[i][j+1]
-					if self.thex:
-						buf = '\x01' + buf
-					l.append(tiger.tiger(buf).digest())
-				except IndexError:
-					l.append(self.level[i][j])
+                if j % 2:
+                    continue
 
-			self.level.append(l)
+                try:
+                    buf = self.level[i][j] + self.level[i][j+1]
+                    if self.thex:
+                        buf = '\x01' + buf
+                    l.append(tiger.tiger(buf).digest())
+                except IndexError:
+                    l.append(self.level[i][j])
 
-		self.level.reverse()
-		if self.maxlevels:
-			del self.level[self.maxlevels:]
+            self.level.append(l)
 
-		self.inited = True
+        self.level.reverse()
+        if self.maxlevels:
+            del self.level[self.maxlevels:]
 
-	def gettree(self):
-		if self.inited:
-			return self.level
+        self.inited = True
 
-	def getroot(self):
-		if self.inited:
-			return base64.b32encode(self.level[0][0])
+    def gettree(self):
+        if self.inited:
+            return self.level
 
-	def dump(self):
-		print "Levels:", len(self.level)
-		for i in range(len(self.level)):
-			print "Level", i, ":", [base64.b32encode(j) for j in self.level[i]]
+    def getroot(self):
+        if self.inited:
+            return base64.b32encode(self.level[0][0])
+
+    def dump(self):
+        print "Levels:", len(self.level)
+        for i in range(len(self.level)):
+            print "Level", i, ":", [base64.b32encode(j) for j in self.level[i]]
