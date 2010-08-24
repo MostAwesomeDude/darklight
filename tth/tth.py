@@ -51,11 +51,7 @@ class TTH:
         for i in range(self.levels):
             l = []
 
-            for j in range(len(self.level[i])):
-
-                if j % 2:
-                    continue
-
+            for j in range(0, len(self.level[i]), 2):
                 try:
                     buf = self.level[i][j] + self.level[i][j+1]
                     if self.thex:
@@ -82,5 +78,5 @@ class TTH:
 
     def dump(self):
         print "Levels:", len(self.level)
-        for i in range(len(self.level)):
-            print "Level", i, ":", [base64.b32encode(j) for j in self.level[i]]
+        for i, level in enumerate(self.level):
+            print "Level", i, ":", [base64.b32encode(j) for j in level]
