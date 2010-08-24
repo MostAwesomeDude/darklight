@@ -27,24 +27,22 @@ class TTH:
         if self.inited:
             return
 
-        h = open(f, "rb")
-        leaves = []
-        # Need to read once, to figure out if file's empty.
-        # This part is really lame.
-        buf = h.read(self.blocksize)
-        if not len(buf):
-            if self.thex:
-                leaves.append(tiger.tiger("\x00").digest())
-            else:
-                leaves.append(tiger.tiger("").digest())
+        if os.stat(f).st_size:
+            h = open(f, "rb")
+            leaves = []
+            buf = h.read(self.blocksize)
+                while len(buf):
+                    if self.thex:
+                        buf = '\x00' + buf
+                    leaves.append(tiger.tiger(buf).digest())
+                    buf = h.read(self.blocksize)
+            h.close()
         else:
-            while len(buf):
-                if self.thex:
-                    buf = '\x00' + buf
-                leaves.append(tiger.tiger(buf).digest())
-                buf = h.read(self.blocksize)
-
-        h.close()
+            # File is empty, special-case hash
+            if self.thex:
+                leaves = [tiger.tiger("\x00").digest()]
+            else:
+                leaves = [tiger.tiger("").digest()]
 
         self.levels = int(math.ceil(math.log(len(leaves),2)))
         self.level = [leaves]
