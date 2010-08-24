@@ -66,11 +66,27 @@ class DarkServerProtocol(twisted.protocols.basic.LineReceiver):
         else:
             self.error()
 
+    def sendtth(self, tokens):
+        """
+        SENDTTH <hash>
+
+        The hash is just a TTH hash.
+        """
+
+        pass
+
     def version(self, tokens):
         self.sendLine("Darklight pre-alpha")
 
-    helpers = {"BAI": bai, "CHECKAPI": checkapi, "FAIL": fail, "KTHNXBAI":
-        kthnxbai, "SENDPEZE": sendpeze, "VERSION": version}
+    helpers = {
+        "BAI": bai,
+        "CHECKAPI": checkapi,
+        "FAIL": fail,
+        "KTHNXBAI": kthnxbai,
+        "SENDPEZE": sendpeze,
+        "SENDTTH": sendtth,
+        "VERSION": version
+    }
 
     def error(self):
         self.sendLine("FAIL")

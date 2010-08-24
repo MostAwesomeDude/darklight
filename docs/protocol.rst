@@ -82,6 +82,12 @@ KTHNXBAI
    they are allowed to terminate the connection after sending this.
  * Reply: BAI
 
+SENDTTH <hash>
+
+ * This command requests the immediate children of the <hash>. The server will
+   reply with 0, 1, or 2 children, space-separated.
+ * Reply: K
+
 SENDPEZE <hash> <size> <piece>
 
  * This command requests the <piece> from the file identified by <hash> and
