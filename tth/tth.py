@@ -3,10 +3,43 @@
 # This code is provided under the terms of the GNU Public License, version 3.
 
 import base64
+import itertools
 import math
 import os
 
 import tiger
+
+def grouper(n, iterable, fillvalue=None):
+    "grouper(3, 'ABCDEFG', 'x') --> ABC DEF Gxx"
+    args = [iter(iterable)] * n
+    return itertools.izip_longest(fillvalue=fillvalue, *args)
+
+class Branch(object):
+    """
+    Helper class for describing binary trees.
+
+    Nodes can be cut off at any point to form a complete tree.
+    """
+
+    def __init__(self, left, right=None, thex=True):
+        self.left = left
+        self.right = right
+
+        if self.right:
+            buf = self.left.value + self.right.value
+            if thex:
+                buf = "\x01" + buf
+            self.value = tiger.tiger(buf).digest()
+        else:
+            self.value = self.left.value
+
+class Leaf(object):
+    """
+    Special-case branch.
+    """
+
+    def __init__(self, value):
+        self.value = value
 
 class TTH(object):
     """A class describing a Tiger Tree Hash tree."""
@@ -45,38 +78,24 @@ class TTH(object):
             else:
                 leaves = [tiger.tiger("").digest()]
 
-        self.levels = int(math.ceil(math.log(len(leaves),2)))
-        self.level = [leaves]
+        level = [Leaf(leaf) for leaf in leaves]
+        self.levels = 0
 
-        for i in range(self.levels):
-            l = []
+        while len(level) > 1:
+            self.levels += 1
+            level = [Branch(left, right) for left, right in grouper(2, level)]
+            print len(level)
 
-            for j in range(0, len(self.level[i]), 2):
-                try:
-                    buf = self.level[i][j] + self.level[i][j+1]
-                    if self.thex:
-                        buf = '\x01' + buf
-                    l.append(tiger.tiger(buf).digest())
-                except IndexError:
-                    l.append(self.level[i][j])
-
-            self.level.append(l)
-
-        self.level.reverse()
-        if self.maxlevels:
-            del self.level[self.maxlevels:]
-
+        self.top = level[0]
         self.inited = True
 
     def gettree(self):
         if self.inited:
-            return self.level
+            return self.top
 
     def getroot(self):
         if self.inited:
-            return base64.b32encode(self.level[0][0])
+            return base64.b32encode(self.top.value)
 
     def dump(self):
-        print "Levels:", len(self.level)
-        for i, level in enumerate(self.level):
-            print "Level", i, ":", [base64.b32encode(j) for j in level]
+        print "Levels: %d" % self.levels
