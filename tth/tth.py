@@ -8,7 +8,7 @@ import os
 
 import tiger
 
-class TTH:
+class TTH(object):
     """A class describing a Tiger Tree Hash tree."""
 
     def __init__(self, filename=None, thex=True, maxlevels=0, blocksize=1024):
