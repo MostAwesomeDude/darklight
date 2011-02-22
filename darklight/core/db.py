@@ -1,7 +1,5 @@
 #!/usr/bin/env python
 
-import pickle
-
 import sqlalchemy
 import sqlalchemy.ext.declarative
 
@@ -13,7 +11,7 @@ class File(sqlalchemy.ext.declarative.declarative_base()):
     path = sqlalchemy.Column(sqlalchemy.String)
     size = sqlalchemy.Column(sqlalchemy.Integer)
     mtime = sqlalchemy.Column(sqlalchemy.Integer)
-    tth = sqlalchemy.Column(sqlalchemy.LargeBinary)
+    tth = sqlalchemy.Column(sqlalchemy.PickleType)
 
 class DarkDB:
     url = "sqlite:///darklight.db"
@@ -36,7 +34,6 @@ class DarkDB:
 
         session = self.sessionmaker()
 
-        buf = buffer(pickle.dumps(file.tth, 1))
         query = session.query(File).filter_by(path=file.path)
 
         if query.count() == 0:
@@ -47,7 +44,7 @@ class DarkDB:
 
         f.size = file.size
         f.mtime = file.mtime
-        f.tth = buf
+        f.tth = file.tth
         session.add(f)
         session.commit()
         file.serial = f.serial
@@ -72,5 +69,5 @@ class DarkDB:
             session.commit()
             file.dirty = True
         else:
-            file.tth = pickle.loads(f.tth)
+            file.tth = f.tth
             file.dirty = False
