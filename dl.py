@@ -11,7 +11,7 @@ pygtk.require("2.0")
 import gtk
 import gtk.glade
 
-from darklight.client import DarkClientProtocol
+from darklight.client.clientprotocol import DarkClientProtocol
 
 gui = gtk.glade.XML("gui.glade")
 

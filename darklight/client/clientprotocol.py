@@ -5,7 +5,7 @@ import base64
 import twisted.internet.defer
 import twisted.protocols.basic
 
-from darklight.aux import DarkHMAC
+from darklight.aux.hash import DarkHMAC
 
 class DarkClientProtocol(twisted.protocols.basic.LineReceiver):
 
