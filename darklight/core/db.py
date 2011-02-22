@@ -4,7 +4,7 @@ import sqlalchemy
 
 from darklight.core.file import DarkFile
 
-class DarkDB:
+class DarkDB(object):
     url = "sqlite:///darklight.db"
     handle = None
 
