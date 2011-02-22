@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 
 import base64
-import functools
-import os.path
 
 import twisted.internet.protocol
 import twisted.internet.reactor
