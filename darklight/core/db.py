@@ -1,59 +1,73 @@
 #!/usr/bin/env python
 
-import os
 import pickle
-import sys
 
-try:
-    import apsw
-except ImportError:
-    print "Fatal error: Couldn't find APSW module..."
-    sys.exit()
+import sqlalchemy
+import sqlalchemy.ext.declarative
+
+class File(sqlalchemy.ext.declarative.declarative_base()):
+
+    __tablename__ = "files"
+
+    serial = sqlalchemy.Column(sqlalchemy.Integer, primary_key=True)
+    path = sqlalchemy.Column(sqlalchemy.String)
+    size = sqlalchemy.Column(sqlalchemy.Integer)
+    mtime = sqlalchemy.Column(sqlalchemy.Integer)
+    tth = sqlalchemy.Column(sqlalchemy.LargeBinary)
 
 class DarkDB:
-    path = "darklight.db"
+    url = "sqlite://darklight.db"
     handle = None
 
     def connect(self):
-        if not os.path.exists(self.path):
-            self.initdb()
-        if not self.handle:
-            self.handle = apsw.Connection(self.path)
+        self.engine = sqlalchemy.create_engine(self.url)
+
+        self.initdb()
+
+        self.session = sqlalchemy.orm.sessionmaker()
+        self.session.configure(bind=self.engine)
         return True
 
     def initdb(self):
-        self.handle = apsw.Connection(self.path)
-        cursor = handle.cursor()
-        cursor.execute("create table files(serial primary key, path text, size, mtime, tth blob)")
+        File.metadata.create_all(self.engine)
 
     def update(self, file):
-        if not self.handle:
+        if not self.session:
             raise Exception, "Not connected!"
 
-        cursor = self.handle.cursor()
-        cursor.execute("select * from files where path=?", (file.path,))
-        temp = [i for i in cursor]
         buf = buffer(pickle.dumps(file.tth, 1))
-        if len(temp) == 0:
-            cursor.execute("insert into files values (null,?,?,?,?)", (file.path, file.size, file.mtime, buf))
-            file.serial = self.handle.last_insert_rowid()
+        query = self.session.query(File).filter_by(path=file.path)
+
+        if query.count() == 0:
+            f = File()
+            f.path = file.path
         else:
-            cursor.execute("update files set size=?, mtime=?, tth=? where path=?", (file.size, file.mtime, buf, file.path))
+            f = query[0]
+
+        f.size = file.size
+        f.mtime = file.mtime
+        f.tth = buf
+        self.session.add(f)
+        self.session.commit()
+        file.serial = f.serial
 
     def verify(self, file):
-        if not self.handle:
+        if not self.session:
             raise Exception, "Not connected!"
 
-        cursor = self.handle.cursor()
-        cursor.execute("select * from files where path=?", (file.path,))
-        try:
-            serial, path, size, mtime, hashblob = next(cursor)
-        except StopIteration:
+        query = self.session.query(File).filter_by(path=file.path)
+
+        if query.count() == 0:
             return
-        if size != file.size or mtime != file.mtime:
-            cursor.execute("update files set size=?, mtime=? where path=?",
-                (file.size, file.mtime, file.path))
+
+        f = query[0]
+
+        if f.size != file.size or f.mtime != file.mtime:
+            f.size = file.size
+            f.mtime = file.mtime
+            self.session.add(f)
+            self.session.commit()
             file.dirty = True
         else:
-            file.tth = pickle.loads(hashblob)
+            file.tth = pickle.loads(f.tth)
             file.dirty = False
