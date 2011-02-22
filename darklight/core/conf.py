@@ -1,10 +1,6 @@
 #!/usr/bin/env python
 
 import ConfigParser
-import os
-
-from cache import DarkCache
-from db import DarkDB
 
 import logging
 logging.basicConfig(level=logging.DEBUG)
