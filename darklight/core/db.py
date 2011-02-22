@@ -16,7 +16,7 @@ class File(sqlalchemy.ext.declarative.declarative_base()):
     tth = sqlalchemy.Column(sqlalchemy.LargeBinary)
 
 class DarkDB:
-    url = "sqlite://darklight.db"
+    url = "sqlite:///darklight.db"
     handle = None
 
     def connect(self):
@@ -24,19 +24,20 @@ class DarkDB:
 
         self.initdb()
 
-        self.session = sqlalchemy.orm.sessionmaker()
-        self.session.configure(bind=self.engine)
+        self.sessionmaker = sqlalchemy.orm.sessionmaker(bind=self.engine)
         return True
 
     def initdb(self):
         File.metadata.create_all(self.engine)
 
     def update(self, file):
-        if not self.session:
+        if not self.sessionmaker:
             raise Exception, "Not connected!"
 
+        session = self.sessionmaker()
+
         buf = buffer(pickle.dumps(file.tth, 1))
-        query = self.session.query(File).filter_by(path=file.path)
+        query = session.query(File).filter_by(path=file.path)
 
         if query.count() == 0:
             f = File()
@@ -47,15 +48,17 @@ class DarkDB:
         f.size = file.size
         f.mtime = file.mtime
         f.tth = buf
-        self.session.add(f)
-        self.session.commit()
+        session.add(f)
+        session.commit()
         file.serial = f.serial
 
     def verify(self, file):
-        if not self.session:
+        if not self.sessionmaker:
             raise Exception, "Not connected!"
 
-        query = self.session.query(File).filter_by(path=file.path)
+        session = self.sessionmaker()
+
+        query = session.query(File).filter_by(path=file.path)
 
         if query.count() == 0:
             return
@@ -65,8 +68,8 @@ class DarkDB:
         if f.size != file.size or f.mtime != file.mtime:
             f.size = file.size
             f.mtime = file.mtime
-            self.session.add(f)
-            self.session.commit()
+            session.add(f)
+            session.commit()
             file.dirty = True
         else:
             file.tth = pickle.loads(f.tth)
