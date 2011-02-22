@@ -12,24 +12,17 @@ from darklight.core.timer import DarkTimer
 
 from serverprotocol import DarkServerProtocol
 
+try:
+    from darklight.core.inotify import DarkNotify
+    inotify = True
+except ImportError:
+    inotify = False
+
 class DarkServerFactory(twisted.internet.protocol.ServerFactory):
     protocol = DarkServerProtocol
 
-    def configure(self):
-        try:
-            # XXX stopgap
-            raise ImportError
-            d = DarkNotify()
-            d.start()
-            d.add(self.dc.folders)
-            print "Started inotify thread..."
-        except (ImportError, NameError):
-            print "Couldn't start inotify thread,"
-            print "\ttry installing pyinotify."
-
     def __init__(self, conf):
         self.dc = conf
-        self.configure()
 
         self.db = DarkDB()
         self.db.path = self.dc.get("database", "path")
@@ -41,6 +34,9 @@ class DarkServerFactory(twisted.internet.protocol.ServerFactory):
         for folder, none in self.dc.items("folders"):
             os.path.walk(folder, self.cache.add, None)
 
+        if inotify:
+            self.prepare_notify()
+
         if self.dc.get("cache", "hash-style").startswith("imm"):
             timer = DarkTimer("hashing files offline")
             self.cache.update()
@@ -48,6 +44,11 @@ class DarkServerFactory(twisted.internet.protocol.ServerFactory):
         else:
             loop = twisted.internet.task.LoopingCall(self.cache.update_single)
             loop.start(1.0)
+
+    def prepare_notify(self):
+        d = DarkNotify()
+        for folder, none in self.dc.items("folders"):
+            d.add(folder)
 
 class DarkSSLFactory(twisted.internet.ssl.DefaultOpenSSLContextFactory):
 
