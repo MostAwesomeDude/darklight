@@ -12,7 +12,7 @@ import twisted.python.usage
 
 from darklight.core.conf import DarkConf
 from darklight.core.timer import DarkTimer
-from darklight.server import DarkServerFactory, DarkSSLFactory
+from darklight.server.serverfactory import DarkServerFactory, DarkSSLFactory
 
 logging.basicConfig(loglevel=logging.DEBUG)
 
