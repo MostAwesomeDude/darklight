@@ -19,25 +19,21 @@ class DarkDB(object):
     def initdb(self):
         DarkFile.metadata.create_all(self.engine)
 
-    def update(self, file):
+    def update(self, f):
         if not self.sessionmaker:
             raise Exception, "Not connected!"
 
         session = self.sessionmaker()
 
-        query = session.query(DarkFile).filter_by(path=file.path)
+        query = session.query(DarkFile).filter_by(path=f.path)
 
         if query.count() == 0:
-            f = DarkFile(file.path)
+            f = DarkFile(f.path)
         else:
             f = query[0]
 
-        f.size = file.size
-        f.mtime = file.mtime
-        f.tth = file.tth
         session.add(f)
         session.commit()
-        file.serial = f.serial
 
     def verify(self, file):
         if not self.sessionmaker:
