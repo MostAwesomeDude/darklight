@@ -6,7 +6,8 @@ import twisted.internet.protocol
 import twisted.internet.reactor
 import twisted.protocols.basic
 
-from darklight.aux import DarkHMAC, util
+from darklight.aux import util
+from darklight.aux.hash import DarkHMAC
 
 PASSTHROUGH_PENDING, PASSTHROUGH, AUTHENTICATED = range(3)
 
