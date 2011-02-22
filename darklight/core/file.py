@@ -11,8 +11,20 @@ from timer import DarkTimer
 import logging
 logging.basicConfig(level=logging.DEBUG)
 
-class DarkFile:
-    """An object representing a file in the system."""
+import sqlalchemy.ext.declarative
+
+class DarkFile(sqlalchemy.ext.declarative.declarative_base()):
+    """
+    A file in the library.
+    """
+
+    __tablename__ = "files"
+
+    serial = sqlalchemy.Column(sqlalchemy.Integer, primary_key=True)
+    path = sqlalchemy.Column(sqlalchemy.String)
+    size = sqlalchemy.Column(sqlalchemy.Integer)
+    mtime = sqlalchemy.Column(sqlalchemy.Integer)
+    tth = sqlalchemy.Column(sqlalchemy.PickleType)
 
     def __init__(self, path):
         self.path = os.path.normpath(path).decode("utf8")

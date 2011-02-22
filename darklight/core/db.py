@@ -1,17 +1,8 @@
 #!/usr/bin/env python
 
 import sqlalchemy
-import sqlalchemy.ext.declarative
 
-class File(sqlalchemy.ext.declarative.declarative_base()):
-
-    __tablename__ = "files"
-
-    serial = sqlalchemy.Column(sqlalchemy.Integer, primary_key=True)
-    path = sqlalchemy.Column(sqlalchemy.String)
-    size = sqlalchemy.Column(sqlalchemy.Integer)
-    mtime = sqlalchemy.Column(sqlalchemy.Integer)
-    tth = sqlalchemy.Column(sqlalchemy.PickleType)
+from darklight.core.file import DarkFile
 
 class DarkDB:
     url = "sqlite:///darklight.db"
@@ -26,7 +17,7 @@ class DarkDB:
         return True
 
     def initdb(self):
-        File.metadata.create_all(self.engine)
+        DarkFile.metadata.create_all(self.engine)
 
     def update(self, file):
         if not self.sessionmaker:
@@ -34,11 +25,10 @@ class DarkDB:
 
         session = self.sessionmaker()
 
-        query = session.query(File).filter_by(path=file.path)
+        query = session.query(DarkFile).filter_by(path=file.path)
 
         if query.count() == 0:
-            f = File()
-            f.path = file.path
+            f = DarkFile(file.path)
         else:
             f = query[0]
 
@@ -55,7 +45,7 @@ class DarkDB:
 
         session = self.sessionmaker()
 
-        query = session.query(File).filter_by(path=file.path)
+        query = session.query(DarkFile).filter_by(path=file.path)
 
         if query.count() == 0:
             return
