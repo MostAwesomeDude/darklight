@@ -6,7 +6,9 @@ import twisted.internet.protocol
 import twisted.internet.ssl
 import twisted.internet.task
 
-from darklight.core import DarkDB, DarkCache, DarkConf, DarkTimer
+from darklight.core.db import DarkDB
+from darklight.core.cache import DarkCache
+from darklight.core.timer import DarkTimer
 
 from serverprotocol import DarkServerProtocol
 
