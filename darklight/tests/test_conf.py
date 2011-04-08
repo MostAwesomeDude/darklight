@@ -1,7 +1,7 @@
 import StringIO
 import unittest
 
-import darklight.core
+from darklight.core.conf import DarkConf
 
 testconf = StringIO.StringIO("""
 # Comment one
@@ -21,7 +21,7 @@ certificate = test.crt
 class TestDarkConf(unittest.TestCase):
 
     def setUp(self):
-        self.dc = darklight.core.DarkConf()
+        self.dc = DarkConf()
 
     def test_conf(self):
         self.dc.readfp(testconf)
