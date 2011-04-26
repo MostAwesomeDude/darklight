@@ -3,7 +3,9 @@
 import twisted.internet.protocol
 import twisted.internet.gtk2reactor
 twisted.internet.gtk2reactor.install()
-import twisted.internet.reactor
+
+from twisted.internet import reactor
+from twisted.internet.task import LoopingCall
 import twisted.internet.ssl
 
 import pygtk
@@ -11,7 +13,7 @@ pygtk.require("2.0")
 import gtk
 import gtk.glade
 
-from darklight.client.clientprotocol import DarkClientProtocol
+from darklight.protocol.darkclient import DarkClientProtocol
 
 gui = gtk.glade.XML("gui.glade")
 
@@ -32,8 +34,8 @@ class ClientLogic(object):
         self.gui = gui
 
         self.connections = set()
-        self.cc = twisted.internet.protocol.ClientCreator(
-            twisted.internet.reactor, DarkClientProtocol)
+        self.cc = twisted.internet.protocol.ClientCreator(reactor,
+            DarkClientProtocol)
 
         statusbar = self.gui.get_widget("statusbar")
         self.status_context = statusbar.get_context_id("")
@@ -45,7 +47,7 @@ class ClientLogic(object):
         for connection in self.connections:
             connection.transport.loseConnection()
 
-        twisted.internet.reactor.stop()
+        reactor.stop()
 
     def set_status(self, message):
         self.gui.get_widget("statusbar").pop(self.status_context)
@@ -65,7 +67,7 @@ class ClientLogic(object):
             column.add_attribute(cell, "text", i)
             server_view.append_column(column)
 
-        self.update_servers()
+        LoopingCall(self.update_servers).start(2)
 
     def setup_signals(self):
         self.gui.signal_connect("on_main_delete_event", self.quit)
@@ -97,23 +99,17 @@ class ClientLogic(object):
     def connected_callback(self, protocol):
         self.set_status("Connected successfully!")
 
-        self.connections.add(protocol)
-        d = protocol.hai("test")
-        d.addCallback(self.authorized_callback)
-        self.update_servers()
+        protocol.connected_deferred.addCallback(self.connections.add)
 
     def authorized_callback(self, protocol):
         self.set_status("Authorized successfully!")
-
-        self.update_servers()
 
     def update_servers(self):
         self.server_list.clear()
 
         for connection in self.connections:
             l = [str(connection)]
-            l.append("Authenticated" if connection.authenticated
-                else "Unauthenticated")
+            l.append("Authenticated")
             self.server_list.append(l)
 
 logic = ClientLogic(gui)
@@ -122,4 +118,4 @@ logic.setup_signals()
 main = gui.get_widget("main")
 main.show()
 
-twisted.internet.reactor.run()
+reactor.run()

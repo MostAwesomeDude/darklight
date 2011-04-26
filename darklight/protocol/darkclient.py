@@ -1,5 +1,6 @@
 from base64 import b32encode
 
+from twisted.internet.defer import Deferred
 from twisted.protocols.stateful import StatefulProtocol
 
 from darklight.aux.hash import DarkHMAC
@@ -12,6 +13,7 @@ class DarkClientProtocol(StatefulProtocol):
 
     def __init__(self, passphrase=None):
         self.passphrase = passphrase
+        self.connected_deferred = Deferred()
 
     def getInitialState(self):
         return self.ohai, 4
@@ -30,6 +32,7 @@ class DarkClientProtocol(StatefulProtocol):
             p = DarkAMP()
             self.transport.protocol = p
             p.makeConnection(self.transport)
+            self.connected_deferred.callback(p)
         else:
             # Failure...
             self.transport.loseConnection()
