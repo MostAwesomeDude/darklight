@@ -25,37 +25,6 @@ class DarkServerProtocol(Protocol):
     def __init__(self):
         print "Protocol created..."
 
-    def sendpeze(self, tokens):
-        """
-        SENDPEZE <hash> <size> <piece>
-
-        The hash is some form of TTH hash. The size and piece are ASCII
-        decimal.
-        """
-
-        try:
-            h, size, piece = tokens
-            h = util.deserialize(h, 24)
-            size = int(size)
-            piece = int(piece)
-        except ValueError:
-            self.error()
-            return
-
-        l = self.factory.cache.search(h, size)
-        if len(l) == 1:
-            buf = self.factory.cache.getdata(l[0], piece)
-            if not buf:
-                print "File buffer was bad..."
-                self.error()
-                return
-            i, sent = 0, 0
-            tth = base64.b32encode(self.factory.cache.getpiece(l[0], piece))
-            self.sendLine("K %s %s" % (tth, str(len(buf))))
-            self.sendLine(buf)
-        else:
-            self.error()
-
     def challenge(self, challenge):
         log.msg("Challenged: %s" % challenge)
 

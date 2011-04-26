@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+from base64 import b32encode
 import os
 
 import twisted.internet.protocol
@@ -50,6 +51,33 @@ class DarkServerFactory(twisted.internet.protocol.ServerFactory):
         d = DarkNotify()
         for folder, none in self.dc.items("folders"):
             d.add(folder)
+
+    def sendpeze(self, h, size, piece):
+        """
+        The hash is some form of TTH hash. The size and piece are ASCII
+        decimal.
+        """
+
+        try:
+            h = util.deserialize(h, 24)
+            size = int(size)
+            piece = int(piece)
+        except ValueError:
+            self.error()
+            return
+
+        l = self.factory.cache.search(h, size)
+        if len(l) == 1:
+            buf = self.factory.cache.getdata(l[0], piece)
+            if not buf:
+                print "File buffer was bad..."
+                self.error()
+                return
+            i, sent = 0, 0
+            tth = b32encode(self.factory.cache.getpiece(l[0], piece))
+            return tth, buf
+        else:
+            self.error()
 
 class DarkSSLFactory(twisted.internet.ssl.DefaultOpenSSLContextFactory):
 
