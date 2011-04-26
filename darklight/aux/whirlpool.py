@@ -31,14 +31,17 @@ try:
 except ImportError:
     pass
 
-#block_size = 64
 digest_size = 64
-digestsize = 64
 
 class Whirlpool(object):
-    """Return a new Whirlpool object. An optional string argument
-    may be provided; if present, this string will be automatically
-    hashed."""
+    """
+    A Whirlpool hashing object.
+
+    See PEP 247 for more information on this object's API.
+    """
+
+    block_size = 64
+    digest_size = 64
 
     def __init__(self, arg=None):
         self.ctx = WhirlpoolStruct()
@@ -47,28 +50,19 @@ class Whirlpool(object):
         self.digest_status = 0
 
     def update(self, arg):
-        """update(arg)"""
         WhirlpoolAdd(arg, len(arg)*8, self.ctx)
         self.digest_status = 0
 
     def digest(self):
-        """digest()"""
         if self.digest_status == 0:
             self.dig = WhirlpoolFinalize(self.ctx)
         self.digest_status = 1
         return self.dig
 
     def hexdigest(self):
-        """hexdigest()"""
-        dig = self.digest()
-        tempstr = ''
-        for d in dig:
-            xxx = '%02x' % (ord(d))
-            tempstr = tempstr + xxx
-        return tempstr
+        return self.digest().encode("hex")
 
     def copy(self):
-        """copy()"""
         import copy
         return copy.deepcopy(self)
 
@@ -79,7 +73,7 @@ def new(init=None):
     hashed."""
     return Whirlpool(init)
 
-__all__ = ("new", "Whirlpool")
+__all__ = ("new", "digest_size", "Whirlpool")
 
 #
 # Private.

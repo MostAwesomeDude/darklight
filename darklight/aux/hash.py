@@ -5,7 +5,7 @@ use_builtin_whirlpool = True
 import hmac
 import datetime
 
-from whirlpool import Whirlpool
+from darklight.aux import whirlpool
 
 try:
     import hashlib
@@ -16,7 +16,7 @@ except (ImportError, ValueError):
 
 def DarkHMAC(psk):
     if use_builtin_whirlpool:
-        digest = Whirlpool
+        digest = whirlpool
     else:
         digest = lambda: hashlib.new("whirlpool")
 
