@@ -4,6 +4,7 @@ from twisted.internet import reactor
 from twisted.internet.endpoints import clientFromString
 from twisted.internet.protocol import Protocol
 from twisted.protocols.portforward import ProxyClientFactory
+from twisted.python import log
 
 from darklight.aux import util
 from darklight.aux.hash import DarkHMAC
@@ -16,14 +17,13 @@ class DarkServerProtocol(Protocol):
     Shim protocol for servers.
     """
 
-    state = PASSTHROUGH_PENDING
-    passthrough = None
+    peer = None
+    buf = ""
 
     endpoint = clientFromString(reactor, "tcp:host=localhost:port=8080")
 
     def __init__(self):
         print "Protocol created..."
-        self.passthrough_pending_lines = []
 
     def sendpeze(self, tokens):
         """
@@ -79,25 +79,29 @@ class DarkServerProtocol(Protocol):
         return True
 
     def connectionMade(self):
-        d = self.endpoint.connect(ProxyClientFactory(self))
+        pcf = ProxyClientFactory()
+        pcf.setServer(self)
+        d = self.endpoint.connect(pcf)
         d.addErrback(lambda failure: self.transport.loseConnection())
+
+        self.transport.pauseProducing()
 
     def setPeer(self, peer):
         # Our proxy passthrough has succeeded, so we will be seeing data
         # coming through shortly.
+        log.msg("Established passthrough")
         self.peer = peer
 
     def dataReceived(self, data):
         self.buf += data
 
         # Examine whether we have received a HAI.
-        if "HAI".startswith(self.buf) or self.buf.startswith("HAI"):
-            # Oh, good. Try a challenge.
-            if self.challenge(self.buf):
-                # Excellent; change protocol.
-                p = DarkAMP()
-                self.transport.protocol = p
-                p.makeConnection(self.transport)
-            else:
-                # Well, go ahead and send it through.
-                self.peer.transport.write(data)
+        if (("HAI".startswith(self.buf) or self.buf.startswith("HAI")) and
+            self.challenge(self.buf)):
+            # Excellent; change protocol.
+            p = DarkAMP()
+            self.transport.protocol = p
+            p.makeConnection(self.transport)
+        elif self.peer:
+            # Well, go ahead and send it through.
+            self.peer.transport.write(data)
