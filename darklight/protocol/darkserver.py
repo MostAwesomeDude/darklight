@@ -20,9 +20,8 @@ class DarkServerProtocol(Protocol):
     peer = None
     buf = ""
 
-    endpoint = clientFromString(reactor, "tcp:host=localhost:port=8080")
-
-    def __init__(self):
+    def __init__(self, endpoint):
+        self.endpoint = endpoint
         print "Protocol created..."
 
     def challenge(self, challenge):

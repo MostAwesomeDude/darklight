@@ -6,6 +6,8 @@ import os
 import twisted.internet.protocol
 import twisted.internet.ssl
 import twisted.internet.task
+from twisted.internet import reactor
+from twisted.internet.endpoints import TCP4ClientEndpoint
 
 from darklight.core.db import DarkDB
 from darklight.core.cache import DarkCache
@@ -21,6 +23,7 @@ except ImportError:
     inotify = False
 
 class DarkServerFactory(twisted.internet.protocol.ServerFactory):
+
     protocol = DarkServerProtocol
 
     def __init__(self, conf):
@@ -46,6 +49,15 @@ class DarkServerFactory(twisted.internet.protocol.ServerFactory):
         else:
             loop = twisted.internet.task.LoopingCall(self.cache.update_single)
             loop.start(1.0)
+
+        self.endpoint = TCP4ClientEndpoint(
+            reactor, self.dc.get("passthrough", "host"),
+            self.dc.getint("passthrough", "port"))
+
+    def buildProtocol(self, addr):
+        p = self.protocol(self.endpoint)
+        p.factory = self
+        return p
 
     def prepare_notify(self):
         d = DarkNotify()

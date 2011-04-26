@@ -28,3 +28,7 @@ class DarkConf(ConfigParser.SafeConfigParser):
         self.set("ssl", "enabled", str(False))
         self.set("ssl", "key", "")
         self.set("ssl", "certificate", "")
+
+        self.add_section("passthrough")
+        self.set("passthrough", "host", "localhost")
+        self.set("passthrough", "port", str(80))
