@@ -35,10 +35,11 @@ except ImportError:
 digest_size = 64
 digestsize = 64
 
-class Whirlpool:
+class Whirlpool(object):
     """Return a new Whirlpool object. An optional string argument
     may be provided; if present, this string will be automatically
     hashed."""
+
     def __init__(self, arg=None):
         self.ctx = WhirlpoolStruct()
         if arg:
@@ -77,6 +78,8 @@ def new(init=None):
     may be provided; if present, this string will be automatically
     hashed."""
     return Whirlpool(init)
+
+__all__ = ("new", "Whirlpool")
 
 #
 # Private.
@@ -636,10 +639,6 @@ class WhirlpoolStruct:
         self.bufferPos = 0
         self.hash = [0]*8
 
-def WhirlpoolInit(ctx):
-    ctx = WhirlpoolStruct()
-    return
-
 def WhirlpoolAdd(source, sourceBits, ctx):
     source = [ord(s)&0xff for s in source]
 
@@ -765,8 +764,9 @@ def processBuffer(ctx):
         L[5] = CDo(K, 5, 4, 3, 2, 1, 0, 7, 6)
         L[6] = CDo(K, 6, 5, 4, 3, 2, 1, 0, 7)
         L[7] = CDo(K, 7, 6, 5, 4, 3, 2, 1, 0)
-        for i in xrange(8):
-            K[i] = L[i]
+
+        K = L[:]
+
         L[0] = CDo(state, 0, 7, 6, 5, 4, 3, 2, 1) ^ K[0]
         L[1] = CDo(state, 1, 0, 7, 6, 5, 4, 3, 2) ^ K[1]
         L[2] = CDo(state, 2, 1, 0, 7, 6, 5, 4, 3) ^ K[2]
@@ -775,9 +775,9 @@ def processBuffer(ctx):
         L[5] = CDo(state, 5, 4, 3, 2, 1, 0, 7, 6) ^ K[5]
         L[6] = CDo(state, 6, 5, 4, 3, 2, 1, 0, 7) ^ K[6]
         L[7] = CDo(state, 7, 6, 5, 4, 3, 2, 1, 0) ^ K[7]
-        for i in xrange(8):
-            state[i] = L[i]
+
+        state = L[:]
+
     # apply the Miyaguchi-Preneel compression function
     for i in xrange(8):
         ctx.hash[i] ^= state[i] ^ block[i]
-    return
