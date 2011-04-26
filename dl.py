@@ -113,6 +113,8 @@ class ClientLogic(object):
 
         self.connections.add(protocol)
         self.update_servers()
+        d = protocol.get_remote_info()
+        d.addCallback(lambda l: self.update_servers())
 
     def update_servers(self):
         self.server_list.clear()

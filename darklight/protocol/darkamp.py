@@ -1,6 +1,5 @@
-from twisted.internet.defer import maybeDeferred
+from twisted.internet.defer import gatherResults, maybeDeferred
 from twisted.protocols.amp import AMP, Command, Integer, String, Unicode
-from twisted.protocols.basic import LineReceiver
 
 class Bai(Command):
 
@@ -43,19 +42,6 @@ class DarkAMP(AMP):
     remote_version = "Unknown"
     remote_api = "Unknown"
 
-    def connectionMade(self):
-        AMP.connectionMade(self)
-
-        d = self.callRemote(CheckAPI)
-        def cb1(d):
-            self.remote_api = d["version"]
-        d.addCallback(cb1)
-
-        d = self.callRemote(Version)
-        def cb2(d):
-            self.remote_version = d["version"]
-        d.addCallback(cb2)
-
     def bai(self):
         self.transport.loseConnection()
     Bai.responder(bai)
@@ -76,3 +62,16 @@ class DarkAMP(AMP):
     def version(self):
         return {"version": "Darklight pre-alpha"}
     Version.responder(version)
+
+    def get_remote_info(self):
+        d1 = self.callRemote(CheckAPI)
+        def cb1(d):
+            self.remote_api = d["version"]
+        d1.addCallback(cb1)
+
+        d2 = self.callRemote(Version)
+        def cb2(d):
+            self.remote_version = d["version"]
+        d2.addCallback(cb2)
+
+        return gatherResults([d1, d2])

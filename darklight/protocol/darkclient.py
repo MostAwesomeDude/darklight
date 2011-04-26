@@ -1,5 +1,6 @@
 from base64 import b32encode
 
+from twisted.internet import reactor
 from twisted.internet.defer import Deferred
 from twisted.protocols.stateful import StatefulProtocol
 from twisted.python import log
@@ -28,17 +29,25 @@ class DarkClientProtocol(StatefulProtocol):
         connection.
         """
 
-        log.msg("data %r" % data)
-
         if data == "OHAI":
             # Success!
             p = DarkAMP()
             self.transport.protocol = p
             p.makeConnection(self.transport)
-            self.connected_deferred.callback(p)
+            reactor.callLater(0, self.connected_deferred.callback, p)
         else:
             # Failure...
             self.transport.loseConnection()
+
+        return self.do_not_care, 1
+
+    def do_not_care(self, data):
+        """
+        Just don't care about more data. Hopefully, we won't be called
+        again...
+        """
+
+        log.msg("data %r" % data)
 
     def connectionMade(self):
         if self.passphrase:
