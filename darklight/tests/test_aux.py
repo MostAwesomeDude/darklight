@@ -3,7 +3,8 @@ import hashlib
 import random
 import unittest
 
-import darklight.aux
+from darklight.aux.hash import DarkHMAC
+from darklight.aux.util import deserialize
 
 class WhirlpoolTest(unittest.TestCase):
 
@@ -17,30 +18,20 @@ class WhirlpoolTest(unittest.TestCase):
 class HMACTest(unittest.TestCase):
 
     def test_simple(self):
-        darklight.aux.DarkHMAC("")
+        DarkHMAC("")
 
     def test_builtin(self):
-        darklight.aux.use_builtin_whirlpool = False
-        default = darklight.aux.DarkHMAC("test")
+        use_builtin_whirlpool = False
+        default = DarkHMAC("test")
 
-        darklight.aux.use_builtin_whirlpool = True
-        other = darklight.aux.DarkHMAC("test")
+        use_builtin_whirlpool = True
+        other = DarkHMAC("test")
 
         self.assertEqual(default, other)
 
 class UtilTest(unittest.TestCase):
 
-    def setUp(self):
-        import darklight.aux.util
-
-    def test_trivial(self):
-        pass
-
     def test_base32(self):
         for i in range(100):
             s = "".join(chr(random.randint(0, 255)) for x in range(i))
-            self.assertEqual(s,
-                darklight.aux.util.deserialize(base64.b32encode(s), len(s)))
-
-if __name__ == "__main__":
-    unittest.main()
+            self.assertEqual(s, deserialize(base64.b32encode(s), len(s)))
