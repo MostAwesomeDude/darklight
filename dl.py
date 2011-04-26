@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+import sys
+
 import twisted.internet.protocol
 import twisted.internet.gtk2reactor
 twisted.internet.gtk2reactor.install()
@@ -7,6 +9,8 @@ twisted.internet.gtk2reactor.install()
 from twisted.internet import reactor
 from twisted.internet.task import LoopingCall
 import twisted.internet.ssl
+from twisted.python import log
+log.startLogging(sys.stdout)
 
 import pygtk
 pygtk.require("2.0")
@@ -25,7 +29,8 @@ def error(message):
 
 server_columns = [
     ("Protocol", str),
-    ("Status", str),
+    ("Version", str),
+    ("API", str),
 ]
 
 class ClientLogic(object):
@@ -67,8 +72,6 @@ class ClientLogic(object):
             column.add_attribute(cell, "text", i)
             server_view.append_column(column)
 
-        LoopingCall(self.update_servers).start(2)
-
     def setup_signals(self):
         self.gui.signal_connect("on_main_delete_event", self.quit)
 
@@ -99,17 +102,25 @@ class ClientLogic(object):
     def connected_callback(self, protocol):
         self.set_status("Connected successfully!")
 
-        protocol.connected_deferred.addCallback(self.connections.add)
+        protocol.connected_deferred.addCallback(self.get_server_info)
 
-    def authorized_callback(self, protocol):
-        self.set_status("Authorized successfully!")
+    def get_server_info(self, protocol):
+        """
+        Get info about a server.
+        """
+
+        log.msg("Getting info")
+
+        self.connections.add(protocol)
+        self.update_servers()
 
     def update_servers(self):
         self.server_list.clear()
 
         for connection in self.connections:
             l = [str(connection)]
-            l.append("Authenticated")
+            l.append(connection.remote_version)
+            l.append(connection.remote_api)
             self.server_list.append(l)
 
 logic = ClientLogic(gui)

@@ -40,6 +40,22 @@ class Version(Command):
 
 class DarkAMP(AMP):
 
+    remote_version = "Unknown"
+    remote_api = "Unknown"
+
+    def connectionMade(self):
+        AMP.connectionMade(self)
+
+        d = self.callRemote(CheckAPI)
+        def cb1(d):
+            self.remote_api = d["version"]
+        d.addCallback(cb1)
+
+        d = self.callRemote(Version)
+        def cb2(d):
+            self.remote_version = d["version"]
+        d.addCallback(cb2)
+
     def bai(self):
         self.transport.loseConnection()
     Bai.responder(bai)

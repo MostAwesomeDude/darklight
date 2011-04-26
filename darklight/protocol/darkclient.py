@@ -2,6 +2,7 @@ from base64 import b32encode
 
 from twisted.internet.defer import Deferred
 from twisted.protocols.stateful import StatefulProtocol
+from twisted.python import log
 
 from darklight.aux.hash import DarkHMAC
 from darklight.protocol.darkamp import DarkAMP
@@ -11,7 +12,7 @@ class DarkClientProtocol(StatefulProtocol):
     Shim protocol which starts up a DL connection for a client.
     """
 
-    def __init__(self, passphrase=None):
+    def __init__(self, passphrase="test"):
         self.passphrase = passphrase
         self.connected_deferred = Deferred()
 
@@ -26,6 +27,8 @@ class DarkClientProtocol(StatefulProtocol):
         anything else, then assume the server doesn't like us, and close the
         connection.
         """
+
+        log.msg("data %r" % data)
 
         if data == "OHAI":
             # Success!

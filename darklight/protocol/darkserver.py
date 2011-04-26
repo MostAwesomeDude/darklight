@@ -57,6 +57,8 @@ class DarkServerProtocol(Protocol):
             self.error()
 
     def challenge(self, challenge):
+        log.msg("Challenged: %s" % challenge)
+
         try:
             hai, passphrase = challenge.strip().split(" ", 1)
         except ValueError:
