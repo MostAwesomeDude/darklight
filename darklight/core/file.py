@@ -4,26 +4,71 @@ import base64
 import os
 import stat
 
-from darklight.tth import TTH
+from darklight.tth import Branch, TTH
 
-import sqlalchemy.ext.declarative
+from sqlalchemy import Column, ForeignKey, Integer, String
+from sqlalchemy.orm import relationship, backref
+from sqlalchemy.ext.declarative import declarative_base
 
 from twisted.python import log
 
 from darklight.core.timer import DarkTimer
 
-class DarkFile(sqlalchemy.ext.declarative.declarative_base()):
+Base = declarative_base()
+
+class DarkTTH(Base):
+    """
+    A TTH node in the database.
+
+    Any node can be a complete or partial tree.
+    """
+
+    __tablename__ = "hashes"
+
+    id = Column(Integer, primary_key=True)
+    parent_id = Column(Integer, ForeignKey("hashes.id"))
+    size = Column(Integer)
+    hash = Column(String)
+
+    children = relationship("DarkTTH",
+        backref=backref("parent", remote_side=id))
+
+    def __init__(self, size, hash):
+        self.size = size
+        self.hash = hash
+
+    def __repr__(self):
+        return "<DarkTTH(%d, %s)>" % (self.size, self.hash.encode("hex"))
+
+    @classmethod
+    def from_tree(cls, tth):
+        """
+        Save a TTH tree into the database, returning the top of the tree.
+        """
+
+        node = cls(tth.size, tth.hash)
+
+        if isinstance(tth, Branch):
+            node.children = [cls.from_tree(tth.left)]
+            if tth.right:
+                node.children.append(cls.from_tree(tth.right))
+
+        return node
+
+class DarkFile(Base):
     """
     A file in the library.
     """
 
     __tablename__ = "files"
 
-    serial = sqlalchemy.Column(sqlalchemy.Integer, primary_key=True)
-    path = sqlalchemy.Column(sqlalchemy.String)
-    size = sqlalchemy.Column(sqlalchemy.Integer)
-    mtime = sqlalchemy.Column(sqlalchemy.Integer)
-    tth = sqlalchemy.Column(sqlalchemy.PickleType)
+    serial = Column(Integer, primary_key=True)
+    path = Column(String)
+    size = Column(Integer)
+    mtime = Column(Integer)
+    tth_id = Column(Integer, ForeignKey("hashes.id"))
+
+    tth = relationship("DarkTTH", backref=backref("file", uselist=False))
 
     def __init__(self, path):
         self.path = os.path.normpath(path).decode("utf8")
@@ -52,9 +97,9 @@ class DarkFile(sqlalchemy.ext.declarative.declarative_base()):
 
     def hash(self):
         timer = DarkTimer("hashing " + self.path)
-        self.tth = TTH(thex=False, blocksize=self.blocksize)
-        self.tth.buildtree(self.path)
-        self.dump()
+        tth = TTH(thex=False, blocksize=self.blocksize)
+        tth.buildtree(self.path)
+        self.tth = DarkTTH.from_tree(tth.top)
         timer.stop()
 
     def update(self):
@@ -82,7 +127,3 @@ class DarkFile(sqlalchemy.ext.declarative.declarative_base()):
             return buf
         else:
             return None
-
-    def dump(self):
-        log.msg((self.size, self.tth.getroot()))
-        # self.tth.dump()

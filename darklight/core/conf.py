@@ -17,7 +17,7 @@ class DarkConf(ConfigParser.SafeConfigParser):
         self.set("cache", "hash-style", "lazy")
 
         self.add_section("database")
-        self.set("database", "path", "darklight.db")
+        self.set("database", "url", "sqlite:///darklight.db")
 
         self.add_section("folders")
 

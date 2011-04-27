@@ -11,6 +11,7 @@ class DarkTimer:
 
     def start(self):
         self.clock = time.time()
+        log.msg("Timer: %s starting" % (self.message))
 
     def stop(self):
         elapsed = time.time() - self.clock

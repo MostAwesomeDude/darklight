@@ -25,20 +25,23 @@ class Branch(object):
         self.right = right
 
         if self.right:
-            buf = self.left.value + self.right.value
+            buf = self.left.hash + self.right.hash
             if thex:
                 buf = "\x01" + buf
-            self.value = tiger.tiger(buf).digest()
+            self.hash = tiger.tiger(buf).digest()
+            self.size = self.left.size + self.right.size
         else:
-            self.value = self.left.value
+            self.size = self.left.size
+            self.hash = self.left.hash
 
 class Leaf(object):
     """
     Special-case branch.
     """
 
-    def __init__(self, value):
-        self.value = value
+    def __init__(self, size, hash):
+        self.size = size
+        self.hash = hash
 
 class TTH(object):
     """A class describing a Tiger Tree Hash tree."""
@@ -67,7 +70,7 @@ class TTH(object):
             while len(buf):
                 if self.thex:
                     buf = '\x00' + buf
-                leaves.append(tiger.tiger(buf).digest())
+                leaves.append((len(buf), tiger.tiger(buf).digest()))
                 buf = h.read(self.blocksize)
             h.close()
         else:
@@ -77,7 +80,7 @@ class TTH(object):
             else:
                 leaves = [tiger.tiger("").digest()]
 
-        level = [Leaf(leaf) for leaf in leaves]
+        level = [Leaf(size, hash) for size, hash in leaves]
         self.levels = 0
 
         while len(level) > 1:
@@ -94,6 +97,3 @@ class TTH(object):
     def getroot(self):
         if self.inited:
             return base64.b32encode(self.top.value)
-
-    def dump(self):
-        print "Levels: %d" % self.levels

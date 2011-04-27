@@ -2,7 +2,7 @@
 
 import sqlalchemy
 
-from darklight.core.file import DarkFile
+from darklight.core.file import DarkFile, DarkTTH
 
 class DarkDB(object):
 
@@ -18,6 +18,7 @@ class DarkDB(object):
 
     def initdb(self):
         DarkFile.metadata.create_all(self.engine)
+        DarkTTH.metadata.create_all(self.engine)
 
     def update(self, f):
         if not self.sessionmaker:
