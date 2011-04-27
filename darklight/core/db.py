@@ -5,23 +5,23 @@ import sqlalchemy
 from darklight.core.file import DarkFile
 
 class DarkDB(object):
-    url = "sqlite:///darklight.db"
+
     handle = None
 
-    def connect(self):
+    def __init__(self, url):
+        self.url = url
         self.engine = sqlalchemy.create_engine(self.url)
 
         self.initdb()
 
         self.sessionmaker = sqlalchemy.orm.sessionmaker(bind=self.engine)
-        return True
 
     def initdb(self):
         DarkFile.metadata.create_all(self.engine)
 
     def update(self, f):
         if not self.sessionmaker:
-            raise Exception, "Not connected!"
+            raise Exception("Not connected!")
 
         session = self.sessionmaker()
 
@@ -37,7 +37,7 @@ class DarkDB(object):
 
     def verify(self, file):
         if not self.sessionmaker:
-            raise Exception, "Not connected!"
+            raise Exception("Not connected!")
 
         session = self.sessionmaker()
 
