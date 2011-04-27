@@ -80,8 +80,8 @@ class DarkFile(Base):
         self.mtime = s[stat.ST_MTIME]
         log.msg("DarkFile: " + self.path)
 
-    def info(self):
-        return (self.size, self.tth.getroot(), self.dirty)
+    def __repr__(self):
+        return "<DarkFile(%s, %d)>" % (self.path.encode("utf8"), self.size)
 
     def match(self, tth, size):
         log.msg((size, tth))
