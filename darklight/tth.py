@@ -83,7 +83,6 @@ class TTH(object):
         while len(level) > 1:
             self.levels += 1
             level = [Branch(left, right) for left, right in grouper(2, level)]
-            print len(level)
 
         self.top = level[0]
         self.inited = True

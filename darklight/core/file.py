@@ -4,7 +4,7 @@ import base64
 import os
 import stat
 
-import tth
+from darklight.tth import TTH
 
 import sqlalchemy.ext.declarative
 
@@ -52,7 +52,7 @@ class DarkFile(sqlalchemy.ext.declarative.declarative_base()):
 
     def hash(self):
         timer = DarkTimer("hashing " + self.path)
-        self.tth = tth.TTH(thex=False, blocksize=self.blocksize)
+        self.tth = TTH(thex=False, blocksize=self.blocksize)
         self.tth.buildtree(self.path)
         self.dump()
         timer.stop()
