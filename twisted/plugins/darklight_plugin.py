@@ -36,7 +36,7 @@ class DarkServiceMaker(object):
     def makeService(self, options):
         from darklight.core.conf import DarkConf
         from darklight.core.timer import DarkTimer
-        from darklight.server.serverfactory import DarkServerFactory, DarkSSLFactory
+        from darklight.factory import DarkServerFactory, DarkSSLFactory
 
         # twisted.python.log.PythonLoggingObserver().start()
 
