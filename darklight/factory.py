@@ -5,7 +5,7 @@ import os
 
 from twisted.internet.protocol import ServerFactory
 import twisted.internet.ssl
-from twisted.internet.task import cooperate
+from twisted.internet.task import coiterate
 from twisted.internet import reactor
 from twisted.internet.endpoints import TCP4ClientEndpoint
 
@@ -38,9 +38,9 @@ class DarkServerFactory(ServerFactory):
             self.dc.getint("passthrough", "port"))
 
     def startFactory(self):
-        g = (self.db.update(DarkFile(f))
+        g = (self.db.get_or_create_file(f)
             for f in self.library_update_iterator())
-        cooperate(g)
+        coiterate(g)
 
     def library_update_iterator(self):
         timer = DarkTimer("library update")

@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 import sqlalchemy
 
 from darklight.core.file import DarkFile, DarkTTH
@@ -14,29 +12,32 @@ class DarkDB(object):
 
         self.initdb()
 
-        self.sessionmaker = sqlalchemy.orm.sessionmaker(bind=self.engine)
+        self.sessionmaker = sqlalchemy.orm.scoped_session(
+            sqlalchemy.orm.sessionmaker(bind=self.engine))
 
     def initdb(self):
         DarkFile.metadata.create_all(self.engine)
         DarkTTH.metadata.create_all(self.engine)
 
-    def update(self, f):
+    def get_or_create_file(self, path):
+        """
+        Retrieve a DarkFile for a path, optionally creating it if it does not
+        already exist.
+        """
+
         if not self.sessionmaker:
             raise Exception("Not connected!")
 
         session = self.sessionmaker()
 
-        query = session.query(DarkFile).filter_by(path=f.path)
+        f = session.query(DarkFile).filter_by(path=path).first()
 
-        if query.count() == 0:
-            f = DarkFile(f.path)
-        else:
-            f = query[0]
+        if not f:
+            f = DarkFile(path)
+            session.add(f)
+            session.commit()
 
-        f.update()
-
-        session.add(f)
-        session.commit()
+        return f
 
     def verify(self, file):
         if not self.sessionmaker:
