@@ -49,7 +49,9 @@ class DarkCache(object):
                 self.files.append(f)
 
     def update(self):
-        [f.update() or self.db.update(f) for f in self.files]
+        for f in self.files:
+            if not f.update():
+                self.db.update(f)
 
     def update_single(self):
         try:
