@@ -10,6 +10,7 @@ from twisted.internet import reactor
 from twisted.internet.endpoints import TCP4ClientEndpoint
 
 from darklight.core.db import DarkDB
+from darklight.core.file import DarkFile
 from darklight.core.timer import DarkTimer
 
 from darklight.protocol.darkserver import DarkServerProtocol
@@ -29,16 +30,13 @@ class DarkServerFactory(twisted.internet.protocol.ServerFactory):
 
         self.db = DarkDB(self.dc.get("database", "url"))
 
-        for folder, none in self.dc.items("folders"):
-            os.path.walk(folder, self.cache.add, None)
+        timer = DarkTimer("hashing files offline")
+        self.update_library_now()
+        timer.stop()
 
         if inotify:
             self.prepare_notify()
 
-        if self.dc.get("cache", "hash-style").startswith("imm"):
-            timer = DarkTimer("hashing files offline")
-            self.cache.update()
-            timer.stop()
         else:
             loop = twisted.internet.task.LoopingCall(self.cache.update_single)
             loop.start(1.0)
@@ -47,9 +45,13 @@ class DarkServerFactory(twisted.internet.protocol.ServerFactory):
             reactor, self.dc.get("passthrough", "host"),
             self.dc.getint("passthrough", "port"))
 
-    def update_library(self, chaff, directory, names):
+    def update_library_now(self):
+        for folder, none in self.dc.items("folders"):
+            os.path.walk(folder, self.update_library_path, None)
+
+    def update_library_path(self, chaff, directory, names):
         for name in names:
-            self.db.update(os.path.join(directory, name))
+            self.db.update(DarkFile(os.path.join(directory, name)))
 
     def buildProtocol(self, addr):
         p = self.protocol(self.endpoint)
