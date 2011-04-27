@@ -13,7 +13,6 @@ from darklight.core.db import DarkDB
 from darklight.core.cache import DarkCache
 from darklight.core.timer import DarkTimer
 
-# from serverprotocol import DarkServerProtocol
 from darklight.protocol.darkserver import DarkServerProtocol
 
 try:
