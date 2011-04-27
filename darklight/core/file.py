@@ -6,7 +6,7 @@ import stat
 
 from darklight.tth import Branch, TTH
 
-from sqlalchemy import Column, ForeignKey, Integer, String
+from sqlalchemy import Column, ForeignKey, Integer, LargeBinary, String
 from sqlalchemy.orm import relationship, backref
 from sqlalchemy.ext.declarative import declarative_base
 
@@ -28,7 +28,7 @@ class DarkTTH(Base):
     id = Column(Integer, primary_key=True)
     parent_id = Column(Integer, ForeignKey("hashes.id"))
     size = Column(Integer)
-    hash = Column(String)
+    hash = Column(LargeBinary)
 
     children = relationship("DarkTTH",
         backref=backref("parent", remote_side=id))
@@ -70,13 +70,14 @@ class DarkFile(Base):
 
     tth = relationship("DarkTTH", backref=backref("file", uselist=False))
 
+    blocksize = 128 * 1024
+    dirty = True
+
     def __init__(self, path):
         self.path = os.path.normpath(path).decode("utf8")
         s = os.stat(self.path)
         self.size = s[stat.ST_SIZE]
         self.mtime = s[stat.ST_MTIME]
-        self.blocksize = 128*1024
-        self.dirty = True
         log.msg("DarkFile: " + self.path)
 
     def info(self):

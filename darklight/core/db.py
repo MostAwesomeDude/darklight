@@ -33,6 +33,8 @@ class DarkDB(object):
         else:
             f = query[0]
 
+        f.update()
+
         session.add(f)
         session.commit()
 
