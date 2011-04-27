@@ -62,26 +62,41 @@ class DarkFile(Base):
 
     __tablename__ = "files"
 
-    serial = Column(Integer, primary_key=True)
-    path = Column(String)
+    path = Column(String, primary_key=True)
     size = Column(Integer)
-    mtime = Column(Integer)
+    mtime = Column(Integer, default=-1)
     tth_id = Column(Integer, ForeignKey("hashes.id"))
 
     tth = relationship("DarkTTH", backref=backref("file", uselist=False))
 
     blocksize = 128 * 1024
-    dirty = True
+    dirty = False
 
     def __init__(self, path):
         self.path = os.path.normpath(path).decode("utf8")
-        s = os.stat(self.path)
-        self.size = s[stat.ST_SIZE]
-        self.mtime = s[stat.ST_MTIME]
+        self.update_from_fs()
         log.msg("DarkFile: " + self.path)
 
     def __repr__(self):
         return "<DarkFile(%s, %d)>" % (self.path.encode("utf8"), self.size)
+
+    def update_from_fs(self):
+        """
+        Gather data from the filesystem.
+
+        This method will dirty the file if appropriate.
+        """
+
+        s = os.stat(self.path)
+        size = s[stat.ST_SIZE]
+        mtime = s[stat.ST_MTIME]
+
+        if size != self.size or mtime != self.mtime:
+            self.dirty = True
+
+    def clean(self):
+        if self.dirty:
+            self.hash()
 
     def match(self, tth, size):
         log.msg((size, tth))
@@ -102,11 +117,6 @@ class DarkFile(Base):
         tth.buildtree(self.path)
         self.tth = DarkTTH.from_tree(tth.top)
         timer.stop()
-
-    def update(self):
-        if self.dirty:
-            self.hash()
-            self.dirty = False
 
     def getpiece(self, pnum):
         self.update()

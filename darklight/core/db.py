@@ -23,6 +23,8 @@ class DarkDB(object):
         """
         Retrieve a DarkFile for a path, optionally creating it if it does not
         already exist.
+
+        Files will be hashed if necessary.
         """
 
         if not self.sessionmaker:
@@ -35,8 +37,9 @@ class DarkDB(object):
         if not f:
             f = DarkFile(path)
             session.add(f)
-            session.commit()
 
+        f.clean()
+        session.commit()
         return f
 
     def verify(self, file):
