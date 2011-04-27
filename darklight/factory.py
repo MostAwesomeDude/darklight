@@ -10,7 +10,6 @@ from twisted.internet import reactor
 from twisted.internet.endpoints import TCP4ClientEndpoint
 
 from darklight.core.db import DarkDB
-from darklight.core.cache import DarkCache
 from darklight.core.timer import DarkTimer
 
 from darklight.protocol.darkserver import DarkServerProtocol
@@ -30,9 +29,6 @@ class DarkServerFactory(twisted.internet.protocol.ServerFactory):
 
         self.db = DarkDB(self.dc.get("database", "url"))
 
-        self.cache = DarkCache(self.dc.getint("cache", "size"))
-        self.cache.db = self.db
-
         for folder, none in self.dc.items("folders"):
             os.path.walk(folder, self.cache.add, None)
 
@@ -50,6 +46,10 @@ class DarkServerFactory(twisted.internet.protocol.ServerFactory):
         self.endpoint = TCP4ClientEndpoint(
             reactor, self.dc.get("passthrough", "host"),
             self.dc.getint("passthrough", "port"))
+
+    def update_library(self, chaff, directory, names):
+        for name in names:
+            self.db.update(os.path.join(directory, name))
 
     def buildProtocol(self, addr):
         p = self.protocol(self.endpoint)

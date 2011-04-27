@@ -8,7 +8,6 @@ testconf = StringIO.StringIO("""
 ; Comment two
 
 [cache]
-size = 1000
 hash_style = immediate
 [database]
 path = test.db
@@ -25,7 +24,6 @@ class TestDarkConf(unittest.TestCase):
 
     def test_conf(self):
         self.dc.readfp(testconf)
-        self.assertEqual(self.dc.getint("cache", "size"), 1000)
         self.assertEqual(self.dc.get("cache", "hash_style"),
             "immediate")
 

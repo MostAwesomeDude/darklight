@@ -13,7 +13,6 @@ class DarkConf(ConfigParser.SafeConfigParser):
         """Load the default settings."""
 
         self.add_section("cache")
-        self.set("cache", "size", str(10 * 1024 * 1024))
         self.set("cache", "hash-style", "lazy")
 
         self.add_section("database")
