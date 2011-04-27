@@ -1,16 +1,12 @@
 #!/usr/bin/env python
 
-import logging
 import os.path
 
 import zope.interface
 import twisted.application.internet
 import twisted.application.service
 import twisted.plugin
-import twisted.python.log
 import twisted.python.usage
-
-logging.basicConfig(loglevel=logging.DEBUG)
 
 class Options(twisted.python.usage.Options):
     optParameters =  [
@@ -38,7 +34,8 @@ class DarkServiceMaker(object):
         from darklight.core.timer import DarkTimer
         from darklight.factory import DarkServerFactory, DarkSSLFactory
 
-        # twisted.python.log.PythonLoggingObserver().start()
+        # from twisted.python import log
+        # log.PythonLoggingObserver().start()
 
         timer = DarkTimer("parsing configuration")
         conf = DarkConf()

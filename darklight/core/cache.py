@@ -2,17 +2,10 @@
 
 import os
 
-from file import DarkFile
-from timer import DarkTimer
+from twisted.python import log
 
-import logging
-logging.basicConfig(level=logging.DEBUG)
-
-def makelong(s):
-    try:
-        return long(s)
-    except ValueError:
-        logging.debug("Couldn't cast '%s' to long..." % s)
+from darklight.core.file import DarkFile
+from darklight.core.timer import DarkTimer
 
 class DarkCache(object):
     """
@@ -33,8 +26,8 @@ class DarkCache(object):
         return iter(self.files)
 
     def dump(self):
-        logging.debug("Cache size: " + str(self.size))
-        logging.debug("Cache maxsize: " + str(self.maxsize))
+        log.msg("Cache size: " + str(self.size))
+        log.msg("Cache maxsize: " + str(self.maxsize))
 
     def setsize(self, size):
         self.maxsize = int(size)

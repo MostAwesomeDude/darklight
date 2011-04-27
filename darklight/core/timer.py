@@ -1,9 +1,7 @@
 #!/usr/bin/env python
 
-import logging
+from twisted.python import log
 import time
-
-logging.basicConfig(level=logging.DEBUG)
 
 class DarkTimer:
 
@@ -16,5 +14,5 @@ class DarkTimer:
 
     def stop(self):
         elapsed = time.time() - self.clock
-        logging.info("Timer: %s finished in %.6f seconds" % (self.message,
+        log.msg("Timer: %s finished in %.6f seconds" % (self.message,
             elapsed))

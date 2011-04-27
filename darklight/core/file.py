@@ -6,12 +6,11 @@ import stat
 
 import tth
 
-from timer import DarkTimer
-
-import logging
-logging.basicConfig(level=logging.DEBUG)
-
 import sqlalchemy.ext.declarative
+
+from twisted.python import log
+
+from darklight.core.timer import DarkTimer
 
 class DarkFile(sqlalchemy.ext.declarative.declarative_base()):
     """
@@ -33,14 +32,14 @@ class DarkFile(sqlalchemy.ext.declarative.declarative_base()):
         self.mtime = s[stat.ST_MTIME]
         self.blocksize = 128*1024
         self.dirty = True
-        logging.debug("DarkFile: " + self.path)
+        log.msg("DarkFile: " + self.path)
 
     def info(self):
         return (self.size, self.tth.getroot(), self.dirty)
 
     def match(self, tth, size):
-        logging.debug((size, tth))
-        logging.debug((self.size, self.tth.getroot()))
+        log.msg((size, tth))
+        log.msg((self.size, self.tth.getroot()))
         if not size and not tth:
             return False
         if size and (size != self.size):
@@ -85,5 +84,5 @@ class DarkFile(sqlalchemy.ext.declarative.declarative_base()):
             return None
 
     def dump(self):
-        logging.debug((self.size, self.tth.getroot()))
+        log.msg((self.size, self.tth.getroot()))
         # self.tth.dump()

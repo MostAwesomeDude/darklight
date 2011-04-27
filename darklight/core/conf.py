@@ -2,9 +2,6 @@
 
 import ConfigParser
 
-import logging
-logging.basicConfig(level=logging.DEBUG)
-
 class DarkConf(ConfigParser.SafeConfigParser):
     """An object that parses configuration."""
 
