@@ -4,7 +4,6 @@
 
 import base64
 import itertools
-import math
 import os
 
 import tiger

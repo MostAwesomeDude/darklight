@@ -70,14 +70,6 @@ class DarkServerFactory(twisted.internet.protocol.ServerFactory):
         decimal.
         """
 
-        try:
-            h = util.deserialize(h, 24)
-            size = int(size)
-            piece = int(piece)
-        except ValueError:
-            self.error()
-            return
-
         l = self.factory.cache.search(h, size)
         if len(l) == 1:
             buf = self.factory.cache.getdata(l[0], piece)

@@ -1,7 +1,3 @@
-import base64
-
-from twisted.internet import reactor
-from twisted.internet.endpoints import clientFromString
 from twisted.internet.protocol import Protocol
 from twisted.protocols.portforward import ProxyClientFactory
 from twisted.python import log
