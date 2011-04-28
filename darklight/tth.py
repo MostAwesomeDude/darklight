@@ -46,7 +46,7 @@ class Leaf(object):
 class TTH(object):
     """A class describing a Tiger Tree Hash tree."""
 
-    def __init__(self, filename=None, thex=True, maxlevels=0, blocksize=1024):
+    def __init__(self, thex=True, maxlevels=0, blocksize=1024):
         self.inited = False
         self.thex = thex
         self.maxlevels = maxlevels
@@ -54,8 +54,6 @@ class TTH(object):
             self.blocksize = 1024
         else:
             self.blocksize = blocksize
-        if filename:
-            self.buildtree(filename)
 
     def buildtree(self, f):
         """Build the tree."""
