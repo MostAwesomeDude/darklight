@@ -137,9 +137,10 @@ class TTH(object):
             leaves = []
             buf = h.read(self.blocksize)
             while len(buf):
+                size = len(buf)
                 if self.thex:
                     buf = '\x00' + buf
-                leaves.append((len(buf), tiger.tiger(buf).digest()))
+                leaves.append((size, tiger.tiger(buf).digest()))
                 buf = h.read(self.blocksize)
             h.close()
         else:
