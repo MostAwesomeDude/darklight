@@ -32,7 +32,7 @@ def parse_magnet(uri):
 
     d = {}
     for parameter in parameters.split("&"):
-        key, value = parameter.split("=")
+        key, value = parameter.split("=", 1)
 
         if key == "xl":
             d["xl"] = int(value)
