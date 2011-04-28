@@ -7,7 +7,6 @@ import twisted.internet.gtk2reactor
 twisted.internet.gtk2reactor.install()
 
 from twisted.internet import reactor
-from twisted.internet.task import LoopingCall
 import twisted.internet.ssl
 from twisted.python import log
 log.startLogging(sys.stdout)
@@ -37,6 +36,8 @@ class ClientLogic(object):
 
     def __init__(self, gui):
         self.gui = gui
+
+        self.server_popup = self.gui.get_object("server_popup")
 
         self.connections = set()
         self.cc = twisted.internet.protocol.ClientCreator(reactor,
@@ -94,6 +95,20 @@ class ClientLogic(object):
         d = self.cc.connectTCP(host, port, 5)
         d.addCallback(self.connected_callback)
 
+    def on_server_mouse_clicked(self, widget, event):
+        if event.button == 3:
+            x = int(event.x)
+            y = int(event.y)
+            try:
+                path, column, cellx, celly = widget.get_path_at_pos(x, y)
+                widget.grab_focus()
+                widget.set_cursor(path, column, 0)
+                self.server_popup.popup(None, None, None, event.button,
+                    event.time)
+            except TypeError:
+                pass
+            return True
+
     def connected_callback(self, protocol):
         self.set_status("Connected successfully!")
 
@@ -103,8 +118,6 @@ class ClientLogic(object):
         """
         Get info about a server.
         """
-
-        log.msg("Getting info")
 
         self.connections.add(protocol)
         self.update_servers()

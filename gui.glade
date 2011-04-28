@@ -73,6 +73,7 @@
           <object class="GtkTreeView" id="server-view">
             <property name="visible">True</property>
             <property name="can_focus">True</property>
+            <signal name="button_press_event" handler="on_server_mouse_clicked"/>
           </object>
           <packing>
             <property name="position">1</property>
@@ -90,5 +91,8 @@
         </child>
       </object>
     </child>
+  </object>
+  <object class="GtkMenu" id="server_popup">
+    <property name="visible">True</property>
   </object>
 </interface>
