@@ -5,11 +5,17 @@ import unittest
 
 from darklight.tth import Branch, Leaf, TTH
 
-class TTHTest(unittest.TestCase):
+class TTHTestVectors(unittest.TestCase):
+    """
+    Test the THEX vectors.
+
+    While THEX might not be Darklight's perferred mode of operation, it is
+    essential that it be supported.
+    """
 
     def test_devnull(self):
         expected = ']\x9e\xd0\n\x03\x0ec\x8b\xdbu:j$\xfb\x90\x0eZc\xb8\xe7>l%\xb6'
-        t = TTH()
+        t = TTH(thex=True)
         t.build_tree_from_path(os.devnull)
         self.assertEqual(t.top.hash, expected)
         self.assertEqual(t.top.size, 0)
