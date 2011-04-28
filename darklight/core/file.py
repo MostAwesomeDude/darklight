@@ -114,7 +114,7 @@ class DarkFile(Base):
     def hash(self):
         timer = DarkTimer("hashing " + self.path)
         tth = TTH(thex=False, blocksize=self.blocksize)
-        tth.buildtree(self.path)
+        tth.build_tree_from_path(self.path)
         self.tth = DarkTTH.from_tree(tth.top)
         timer.stop()
 

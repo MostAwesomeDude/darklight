@@ -46,20 +46,34 @@ class Leaf(object):
 class TTH(object):
     """A class describing a Tiger Tree Hash tree."""
 
+    top = None
+    """
+    The top of the tree.
+
+    May be None if the tree has not been initialized.
+    """
+
+    complete = False
+    """
+    Whether this tree is complete.
+
+    Completed trees have leaves for every single block in the object they have
+    hashed.
+    """
+
     def __init__(self, thex=True, maxlevels=0, blocksize=1024):
-        self.inited = False
         self.thex = thex
         self.maxlevels = maxlevels
+
         if self.thex:
             self.blocksize = 1024
         else:
             self.blocksize = blocksize
 
-    def buildtree(self, f):
-        """Build the tree."""
-
-        if self.inited:
-            return
+    def build_tree_from_path(self, f):
+        """
+        Build a complete tree by hashing a file.
+        """
 
         if os.stat(f).st_size:
             h = open(f, "rb")
@@ -86,12 +100,4 @@ class TTH(object):
             level = [Branch(left, right) for left, right in grouper(2, level)]
 
         self.top = level[0]
-        self.inited = True
-
-    def gettree(self):
-        if self.inited:
-            return self.top
-
-    def getroot(self):
-        if self.inited:
-            return base64.b32encode(self.top.value)
+        self.complete = True
