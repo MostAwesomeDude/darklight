@@ -94,5 +94,13 @@
   </object>
   <object class="GtkMenu" id="server_popup">
     <property name="visible">True</property>
+    <child>
+      <object class="GtkMenuItem" id="disconnect">
+        <property name="visible">True</property>
+        <property name="label" translatable="yes">Disconnect</property>
+        <property name="use_underline">True</property>
+        <signal name="activate" handler="on_disconnect_server"/>
+      </object>
+    </child>
   </object>
 </interface>

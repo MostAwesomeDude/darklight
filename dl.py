@@ -102,12 +102,18 @@ class ClientLogic(object):
             try:
                 path, column, cellx, celly = widget.get_path_at_pos(x, y)
                 widget.grab_focus()
-                widget.set_cursor(path, column, 0)
+                widget.set_cursor(path, column, False)
                 self.server_popup.popup(None, None, None, event.button,
                     event.time)
             except TypeError:
                 pass
             return True
+
+    def on_disconnect_server(self, widget):
+        for connection in self.connections:
+            connection.transport.loseConnection()
+
+        self.update_servers()
 
     def connected_callback(self, protocol):
         self.set_status("Connected successfully!")
