@@ -47,7 +47,7 @@ def parse_magnet(uri):
 
 def create_magnet(size, h):
     """
-    Create a magnet link for a given chunk.
+    Create a magnet link for a given node in a TTH.
     """
 
     uri = "magnet:?xl=%d&xt=urn:tree:tiger:%s" % (size, b32encode(h))
