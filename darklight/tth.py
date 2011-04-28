@@ -19,19 +19,34 @@ class Branch(object):
     Nodes can be cut off at any point to form a complete tree.
     """
 
-    def __init__(self, left, right=None, thex=True):
+    def __init__(self, left=None, right=None, thex=True):
         self.left = left
         self.right = right
 
-        if self.right:
+        if self.left and self.right:
             buf = self.left.hash + self.right.hash
             if thex:
                 buf = "\x01" + buf
             self.hash = tiger.tiger(buf).digest()
             self.size = self.left.size + self.right.size
-        else:
+        elif self.left:
             self.size = self.left.size
             self.hash = self.left.hash
+
+    def __eq__(self, other):
+        return self.size == other.size and self.hash == other.hash
+
+    @classmethod
+    def as_incomplete(cls, size, hash, **kwargs):
+        """
+        Make an incomplete branch node.
+        """
+
+        self = cls(**kwargs)
+        self.size = size
+        self.hash = hash
+
+        return self
 
 class Leaf(object):
     """
@@ -60,14 +75,57 @@ class TTH(object):
     hashed.
     """
 
-    def __init__(self, thex=True, maxlevels=0, blocksize=1024):
+    def __init__(self, thex=False, maxlevels=0, blocksize=128 * 1024):
         self.thex = thex
-        self.maxlevels = maxlevels
 
         if self.thex:
             self.blocksize = 1024
         else:
             self.blocksize = blocksize
+
+    @classmethod
+    def from_size_and_hash(cls, size, hash, **kwargs):
+        """
+        Create an incomplete tree from a size and a hash.
+
+        The tree may end up being complete if it only has one node.
+        """
+
+        self = cls(**kwargs)
+        if size > self.blocksize:
+            self.top = Branch.as_incomplete(size, hash, thex=self.thex)
+            self.complete = False
+        else:
+            self.top = Leaf(size, hash)
+            self.complete = True
+
+        return self
+
+    def iter_incomplete_branches(self):
+        """
+        Get a list of branches which have incomplete children.
+
+        This method goes through the entire tree regardless of whether it is
+        marked as complete.
+        """
+
+        stack = [self.top]
+
+        while stack:
+            current = stack[-1]
+            if isinstance(current, Leaf):
+                stack.pop()
+            elif current.left:
+                stack.append(current.left)
+            elif current.right:
+                stack.append(current.right)
+            else:
+                while not (current.left and current.right):
+                    yield stack.pop()
+                    if stack:
+                        current = stack[-1]
+                    else:
+                        break
 
     def build_tree_from_path(self, f):
         """
