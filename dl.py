@@ -15,11 +15,11 @@ log.startLogging(sys.stdout)
 import pygtk
 pygtk.require("2.0")
 import gtk
-import gtk.glade
 
 from darklight.protocol.darkclient import DarkClientProtocol
 
-gui = gtk.glade.XML("gui.glade")
+gui = gtk.Builder()
+gui.add_from_file("gui.glade")
 
 def error(message):
     dialog = gtk.MessageDialog(main, gtk.DIALOG_MODAL, gtk.MESSAGE_ERROR,
@@ -42,26 +42,20 @@ class ClientLogic(object):
         self.cc = twisted.internet.protocol.ClientCreator(reactor,
             DarkClientProtocol)
 
-        statusbar = self.gui.get_widget("statusbar")
+        statusbar = self.gui.get_object("statusbar")
         self.status_context = statusbar.get_context_id("")
         self.set_status("Welcome to DarkLight!")
 
         self.setup_servers()
 
-    def quit(self, window, event):
-        for connection in self.connections:
-            connection.transport.loseConnection()
-
-        reactor.stop()
-
     def set_status(self, message):
-        self.gui.get_widget("statusbar").pop(self.status_context)
-        self.gui.get_widget("statusbar").push(self.status_context, message)
+        self.gui.get_object("statusbar").pop(self.status_context)
+        self.gui.get_object("statusbar").push(self.status_context, message)
 
     def setup_servers(self):
         column_names, column_types = zip(*server_columns)
         self.server_list = gtk.ListStore(*column_types)
-        server_view = self.gui.get_widget("server-view")
+        server_view = self.gui.get_object("server-view")
         server_view.set_model(self.server_list)
         server_view.set_reorderable(True)
 
@@ -72,14 +66,15 @@ class ClientLogic(object):
             column.add_attribute(cell, "text", i)
             server_view.append_column(column)
 
-    def setup_signals(self):
-        self.gui.signal_connect("on_main_delete_event", self.quit)
+    def on_main_delete_event(self, window, event):
+        for connection in self.connections:
+            connection.transport.loseConnection()
 
-        self.gui.signal_connect("on_connect_clicked", self.connect)
+        reactor.stop()
 
-    def connect(self, widget):
-        host = self.gui.get_widget("host").get_property("text")
-        port = self.gui.get_widget("port").get_property("text")
+    def on_connect_clicked(self, widget):
+        host = self.gui.get_object("host").get_property("text")
+        port = self.gui.get_object("port").get_property("text")
 
         if not host:
             error("No host specified!")
@@ -126,9 +121,9 @@ class ClientLogic(object):
             self.server_list.append(l)
 
 logic = ClientLogic(gui)
-logic.setup_signals()
+logic.gui.connect_signals(logic)
 
-main = gui.get_widget("main")
+main = gui.get_object("main")
 main.show()
 
 reactor.run()
