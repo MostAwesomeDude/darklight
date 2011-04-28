@@ -76,9 +76,9 @@ class TTH(object):
         else:
             # File is empty, special-case hash
             if self.thex:
-                leaves = [tiger.tiger("\x00").digest()]
+                leaves = [(0, tiger.tiger("\x00").digest())]
             else:
-                leaves = [tiger.tiger("").digest()]
+                leaves = [(0, tiger.tiger("").digest())]
 
         level = [Leaf(size, hash) for size, hash in leaves]
         self.levels = 0
