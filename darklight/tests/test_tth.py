@@ -93,14 +93,14 @@ class IterIncompleteBranches(unittest.TestCase):
         tth.top = Branch.as_incomplete(1, "asdf")
         tth.top.left = Branch.as_incomplete(2, "asdf")
         self.assertEqual(list(tth.iter_incomplete_branches()),
-            [tth.top.left, tth.top])
+            [tth.top, tth.top.left])
 
     def test_incomplete_right(self):
         tth = TTH()
         tth.top = Branch.as_incomplete(1, "asdf")
         tth.top.right = Branch.as_incomplete(2, "asdf")
         self.assertEqual(list(tth.iter_incomplete_branches()),
-            [tth.top.right, tth.top])
+            [tth.top, tth.top.right])
 
 class TTHTestAPI(unittest.TestCase):
 

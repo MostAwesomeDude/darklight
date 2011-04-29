@@ -98,6 +98,16 @@ class TTH(object):
 
         return self
 
+    def is_complete(self, branch):
+        if branch.is_leaf:
+            return True
+        if branch.left:
+            if branch.right:
+                return True
+            if self.blocksize <= branch.size:
+                return True
+        return False
+
     def iter_incomplete_branches(self):
         """
         Get a list of branches which have incomplete children.
@@ -109,20 +119,13 @@ class TTH(object):
         stack = [self.top]
 
         while stack:
-            current = stack[-1]
-            if current.is_leaf:
-                stack.pop()
-            elif current.left and not current.left.is_leaf:
-                stack.append(current.left)
-            elif current.right and not current.right.is_leaf:
+            current = stack.pop()
+            if current.right:
                 stack.append(current.right)
-            else:
-                while not (current.left and current.right):
-                    yield stack.pop()
-                    if stack:
-                        current = stack[-1]
-                    else:
-                        break
+            if current.left:
+                stack.append(current.left)
+            if not self.is_complete(current):
+                yield current
 
     def extend_branch(self, branch, data):
         """
