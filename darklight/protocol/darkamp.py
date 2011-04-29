@@ -1,6 +1,13 @@
 from twisted.internet.defer import gatherResults, maybeDeferred
 from twisted.protocols.amp import AMP, Command, Integer, String, Unicode
 
+class UnknownHashError(Exception):
+    """
+    The requested hash could not be found.
+
+    This probably isn't fatal.
+    """
+
 class Bai(Command):
 
     arguments = []
@@ -12,6 +19,20 @@ class CheckAPI(Command):
 
     arguments = []
     response = [("version", Integer())]
+
+class HazTree(Command):
+
+    arguments = [
+        ("hash", String()),
+        ("size", Integer()),
+    ]
+    response = [
+        ("first_hash", String()),
+        ("first_size", Integer()),
+        ("second_hash", String()),
+        ("second_size", Integer()),
+    ]
+    errors = {UnknownHashError: "UNKNOWN_HASH"}
 
 class KThnxBai(Command):
 
@@ -49,6 +70,18 @@ class DarkAMP(AMP):
     def checkapi(self):
         return {"version": 2}
     CheckAPI.responder(checkapi)
+
+    def haztree(self, hash, size):
+        branch = self.factory.db.find_branch(hash, size)
+        if not branch:
+            raise UnknownHashError()
+        return {
+            "first_hash": branch.children[0].hash,
+            "first_size": branch.children[0].size,
+            "second_hash": branch.children[1].hash,
+            "second_size": branch.children[1].size,
+        }
+    HazTree.responder(haztree)
 
     def kthnxbai(self):
         self.callRemote(Bai)
