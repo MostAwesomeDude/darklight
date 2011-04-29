@@ -102,5 +102,19 @@ class IterIncompleteBranches(unittest.TestCase):
         self.assertEqual(list(tth.iter_incomplete_branches()),
             [tth.top.right, tth.top])
 
+class TTHTestAPI(unittest.TestCase):
+
+    def test_from_size_and_hash_leaf(self):
+        tth = TTH.from_size_and_hash(1, "asdf")
+        self.assertTrue(tth.complete)
+        self.assertEqual(tth.top.size, 1)
+        self.assertEqual(tth.top.hash, "asdf")
+
+    def test_from_size_and_hash_branch(self):
+        tth = TTH.from_size_and_hash(1000000, "asdf")
+        self.assertFalse(tth.complete)
+        self.assertEqual(tth.top.size, 1000000)
+        self.assertEqual(tth.top.hash, "asdf")
+
 if __name__ == "__main__":
     unittest.main()

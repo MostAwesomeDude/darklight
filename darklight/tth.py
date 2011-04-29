@@ -124,6 +124,25 @@ class TTH(object):
                     else:
                         break
 
+    def extend_branch(self, branch, data):
+        """
+        Extend a branch using data from the network.
+        """
+
+        left = Branch.as_incomplete(data["first_hash"], data["first_size"],
+            thex=self.thex)
+        if left.size < self.blocksize:
+            left.is_leaf = True
+        right = Branch.as_incomplete(data["second_hash"],
+            data["second_size"], thex=self.thex)
+        if right.size < self.blocksize:
+            right.is_leaf = True
+
+        if not branch.left:
+            branch.left = left
+        if not branch.right:
+            branch.right = right
+
     def build_tree_from_path(self, f):
         """
         Build a complete tree by hashing a file.
