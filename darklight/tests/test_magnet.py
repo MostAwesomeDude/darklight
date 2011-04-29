@@ -1,6 +1,6 @@
 import unittest
 
-from darklight.magnet import create_magnet, parse_magnet, parse_urn
+from darklight.magnet import parse_magnet, parse_urn
 
 class ParseURNTest(unittest.TestCase):
 
@@ -25,3 +25,10 @@ class ParseMagnetTest(unittest.TestCase):
 
     def test_invalid_header(self):
         self.assertRaises(Exception, parse_magnet, "hurp:?xt=1234")
+
+    def test_base32_padded(self):
+        magnet = ("magnet:"
+            "?xt=urn:tree:tiger:4ZSRNBDNLLOHAJJ75ZMKONCCFD4EPUOWUEZDEYI=")
+        d = parse_magnet(magnet)
+        self.assertEqual(d["xt"],
+            "\xe6e\x16\x84mZ\xdcp%?\xeeX\xa74B(\xf8G\xd1\xd6\xa122a")

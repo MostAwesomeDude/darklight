@@ -66,6 +66,7 @@ class DarkServerProtocol(Protocol):
             self.challenge(self.buf)):
             # Excellent; change protocol.
             p = DarkAMP()
+            p.factory = self.factory
             self.transport.protocol = p
             p.makeConnection(self.transport)
         elif self.peer:

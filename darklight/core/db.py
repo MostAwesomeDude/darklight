@@ -42,6 +42,18 @@ class DarkDB(object):
         session.commit()
         return f
 
+    def find_branch(self, hash, size):
+        """
+        Find a hash branch, or return None.
+        """
+
+        if not self.sessionmaker:
+            raise Exception("Not connected!")
+
+        session = self.sessionmaker()
+
+        return session.query(DarkTTH).filter_by(hash=hash, size=size).first()
+
     def verify(self, file):
         if not self.sessionmaker:
             raise Exception("Not connected!")

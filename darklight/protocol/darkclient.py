@@ -32,6 +32,7 @@ class DarkClientProtocol(StatefulProtocol):
         if data == "OHAI":
             # Success!
             p = DarkAMP()
+            # XXX p.factory = self.factory
             self.transport.protocol = p
             p.makeConnection(self.transport)
             reactor.callLater(0, self.connected_deferred.callback, p)
