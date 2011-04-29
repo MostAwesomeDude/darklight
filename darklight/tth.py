@@ -129,12 +129,12 @@ class TTH(object):
         Extend a branch using data from the network.
         """
 
-        left = Branch.as_incomplete(data["first_hash"], data["first_size"],
+        left = Branch.as_incomplete(data["first_size"], data["first_hash"],
             thex=self.thex)
         if left.size < self.blocksize:
             left.is_leaf = True
-        right = Branch.as_incomplete(data["second_hash"],
-            data["second_size"], thex=self.thex)
+        right = Branch.as_incomplete(data["second_size"],
+            data["second_hash"], thex=self.thex)
         if right.size < self.blocksize:
             right.is_leaf = True
 
