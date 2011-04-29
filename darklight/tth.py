@@ -19,13 +19,12 @@ class Branch(object):
     Nodes can be cut off at any point to form a complete tree.
     """
 
-    is_leaf = False
-
-    def __init__(self, left=None, right=None, thex=True):
+    def __init__(self, left=None, right=None, is_leaf=False, thex=True):
         self.left = left
         self.right = right
+        self.is_leaf = is_leaf
 
-        if self.left and self.right:
+        if self.left and self.right and not is_leaf:
             buf = self.left.hash + self.right.hash
             if thex:
                 buf = "\x01" + buf
@@ -53,21 +52,6 @@ class Branch(object):
         self.hash = hash
 
         return self
-
-class Leaf(object):
-    """
-    Special-case branch.
-    """
-
-    is_leaf = True
-
-    def __init__(self, size, hash):
-        self.size = size
-        self.hash = hash
-
-    def __repr__(self):
-        return "<Leaf(%s, %d)%s>" % (self.hash.encode("hex"), self.size,
-            " (leaf)" if self.is_leaf else "")
 
 class TTH(object):
     """A class describing a Tiger Tree Hash tree."""
@@ -108,7 +92,8 @@ class TTH(object):
             self.top = Branch.as_incomplete(size, hash, thex=self.thex)
             self.complete = False
         else:
-            self.top = Leaf(size, hash)
+            self.top = Branch.as_incomplete(size, hash, thex=self.thex,
+                is_leaf=True)
             self.complete = True
 
         return self
@@ -125,7 +110,7 @@ class TTH(object):
 
         while stack:
             current = stack[-1]
-            if isinstance(current, Leaf):
+            if current.is_leaf:
                 stack.pop()
             elif current.left:
                 stack.append(current.left)
@@ -162,7 +147,8 @@ class TTH(object):
             else:
                 leaves = [(0, tiger.tiger("").digest())]
 
-        level = [Leaf(size, hash) for size, hash in leaves]
+        level = [Branch.as_incomplete(size, hash, is_leaf=True, thex=self.thex)
+            for size, hash in leaves]
         self.levels = 0
 
         while len(level) > 1:

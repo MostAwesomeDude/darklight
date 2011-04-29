@@ -4,7 +4,7 @@ import os
 import unittest
 import tempfile
 
-from darklight.tth import Branch, Leaf, TTH
+from darklight.tth import Branch, TTH
 
 class TTHTestVectors(unittest.TestCase):
     """
@@ -57,9 +57,6 @@ class TTHTestVectors(unittest.TestCase):
             "\xcd\x80q\xba'\x96&\xb7qd-\x10\xa3\xdb")
         t = TTH(thex=True)
         t.build_tree_from_path(f.name)
-        print t.top
-        print t.top.left
-        print t.top.right
         self.assertEqual(t.top.hash, expected)
         self.assertEqual(t.top.size, 1025)
 
@@ -78,7 +75,7 @@ class IterIncompleteBranches(unittest.TestCase):
         """
 
         tth = TTH()
-        tth.top = Leaf(1, "asdf")
+        tth.top = Branch.as_incomplete(1, "asdf", is_leaf=True)
         self.assertEqual(list(tth.iter_incomplete_branches()), [])
 
     def test_single_branch(self):
