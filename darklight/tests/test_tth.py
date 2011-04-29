@@ -57,6 +57,9 @@ class TTHTestVectors(unittest.TestCase):
             "\xcd\x80q\xba'\x96&\xb7qd-\x10\xa3\xdb")
         t = TTH(thex=True)
         t.build_tree_from_path(f.name)
+        print t.top
+        print t.top.left
+        print t.top.right
         self.assertEqual(t.top.hash, expected)
         self.assertEqual(t.top.size, 1025)
 

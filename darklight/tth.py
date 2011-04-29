@@ -19,6 +19,8 @@ class Branch(object):
     Nodes can be cut off at any point to form a complete tree.
     """
 
+    is_leaf = False
+
     def __init__(self, left=None, right=None, thex=True):
         self.left = left
         self.right = right
@@ -35,6 +37,10 @@ class Branch(object):
 
     def __eq__(self, other):
         return self.size == other.size and self.hash == other.hash
+
+    def __repr__(self):
+        return "<Branch(%s, %d)%s>" % (self.hash.encode("hex"), self.size,
+            " (leaf)" if self.is_leaf else "")
 
     @classmethod
     def as_incomplete(cls, size, hash, **kwargs):
@@ -53,9 +59,15 @@ class Leaf(object):
     Special-case branch.
     """
 
+    is_leaf = True
+
     def __init__(self, size, hash):
         self.size = size
         self.hash = hash
+
+    def __repr__(self):
+        return "<Leaf(%s, %d)%s>" % (self.hash.encode("hex"), self.size,
+            " (leaf)" if self.is_leaf else "")
 
 class TTH(object):
     """A class describing a Tiger Tree Hash tree."""
