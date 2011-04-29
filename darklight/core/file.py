@@ -4,9 +4,10 @@ import base64
 import os
 import stat
 
-from darklight.tth import Branch, TTH
+from darklight.tth import TTH
 
-from sqlalchemy import Column, ForeignKey, Integer, LargeBinary, String
+from sqlalchemy import (Column, ForeignKey, Boolean, Integer, LargeBinary,
+    String)
 from sqlalchemy.orm import relationship, backref
 from sqlalchemy.ext.declarative import declarative_base
 
@@ -29,6 +30,7 @@ class DarkTTH(Base):
     parent_id = Column(Integer, ForeignKey("hashes.id"))
     size = Column(Integer)
     hash = Column(LargeBinary)
+    is_leaf = Column(Boolean, default=False)
 
     children = relationship("DarkTTH",
         backref=backref("parent", remote_side=id))
@@ -48,7 +50,9 @@ class DarkTTH(Base):
 
         node = cls(tth.size, tth.hash)
 
-        if isinstance(tth, Branch):
+        if tth.is_leaf:
+            node.is_leaf = True
+        else:
             node.children = [cls.from_tree(tth.left)]
             if tth.right:
                 node.children.append(cls.from_tree(tth.right))

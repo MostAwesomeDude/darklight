@@ -1,6 +1,13 @@
 from twisted.internet.defer import gatherResults, maybeDeferred
 from twisted.protocols.amp import AMP, Command, Integer, String, Unicode
 
+class BranchLeafError(Exception):
+    """
+    You thought I was a branch.
+
+    FYI I am a leaf.
+    """
+
 class UnknownHashError(Exception):
     """
     The requested hash could not be found.
@@ -32,7 +39,10 @@ class HazTree(Command):
         ("second_hash", String()),
         ("second_size", Integer()),
     ]
-    errors = {UnknownHashError: "UNKNOWN_HASH"}
+    errors = {
+        BranchLeafError: "BRANCH_LEAF",
+        UnknownHashError: "UNKNOWN_HASH",
+    }
 
 class KThnxBai(Command):
 
@@ -75,6 +85,8 @@ class DarkAMP(AMP):
         branch = self.factory.db.find_branch(hash, size)
         if not branch:
             raise UnknownHashError()
+        if branch.is_leaf:
+            raise BranchLeafError()
         return {
             "first_hash": branch.children[0].hash,
             "first_size": branch.children[0].size,

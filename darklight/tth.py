@@ -112,9 +112,9 @@ class TTH(object):
             current = stack[-1]
             if current.is_leaf:
                 stack.pop()
-            elif current.left:
+            elif current.left and not current.left.is_leaf:
                 stack.append(current.left)
-            elif current.right:
+            elif current.right and not current.right.is_leaf:
                 stack.append(current.right)
             else:
                 while not (current.left and current.right):
@@ -131,17 +131,20 @@ class TTH(object):
 
         left = Branch.as_incomplete(data["first_size"], data["first_hash"],
             thex=self.thex)
-        if left.size < self.blocksize:
+        if left.size <= self.blocksize:
             left.is_leaf = True
         right = Branch.as_incomplete(data["second_size"],
             data["second_hash"], thex=self.thex)
-        if right.size < self.blocksize:
+        if right.size <= self.blocksize:
             right.is_leaf = True
 
         if not branch.left:
             branch.left = left
         if not branch.right:
             branch.right = right
+
+        if not any(self.iter_incomplete_branches()):
+            self.complete = True
 
     def build_tree_from_path(self, f):
         """
