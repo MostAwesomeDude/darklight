@@ -108,12 +108,12 @@ class TTH(object):
                 return True
         return False
 
-    def iter_incomplete_branches(self):
+    def iter_branches(self):
         """
-        Get a list of branches which have incomplete children.
+        Yield every branch (and leaf) in the tree, in no particular order.
 
-        This method goes through the entire tree regardless of whether it is
-        marked as complete.
+        The order is actually currently a right-to-left depth-first traversal,
+        but that shouldn't matter.
         """
 
         stack = [self.top]
@@ -124,8 +124,19 @@ class TTH(object):
                 stack.append(current.right)
             if current.left:
                 stack.append(current.left)
-            if not self.is_complete(current):
-                yield current
+            yield current
+
+    def iter_incomplete_branches(self):
+        """
+        Get a list of branches which have incomplete children.
+
+        This method goes through the entire tree regardless of whether it is
+        marked as complete.
+        """
+
+        for branch in self.iter_branches():
+            if not self.is_complete(branch):
+                yield branch
 
     def extend_branch(self, branch, data):
         """
