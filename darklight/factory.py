@@ -62,8 +62,13 @@ class DarkServerFactory(ServerFactory):
 
     def sendpeze(self, h, size, piece):
         """
-        The hash is some form of TTH hash. The size and piece are ASCII
-        decimal.
+        Get a chunk of a file.
+
+        Pieces are always 64KiB big, and are indexed on 64KiB boundaries.
+
+        :param str h: the hash
+        :param int size: the size
+        :param int piece: the index of the requested piece
         """
 
         l = self.factory.cache.search(h, size)
