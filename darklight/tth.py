@@ -7,10 +7,10 @@ import os
 
 import tiger
 
-def grouper(n, iterable, fillvalue=None):
-    "grouper(3, 'ABCDEFG', 'x') --> ABC DEF Gxx"
+def grouper(n, iterable):
+    "grouper(3, 'ABCDEFG') --> ABC DEF"
     args = [iter(iterable)] * n
-    return itertools.izip_longest(fillvalue=fillvalue, *args)
+    return itertools.izip(*args)
 
 class Branch(object):
     """
@@ -24,15 +24,17 @@ class Branch(object):
         self.right = right
         self.is_leaf = is_leaf
 
-        if self.left and self.right and not is_leaf:
-            buf = self.left.hash + self.right.hash
+        if left and right and not is_leaf:
+            # Branch.
+            buf = left.hash + right.hash
             if thex:
-                buf = "\x01" + buf
+                buf = "\x01%s" % buf
             self.hash = tiger.tiger(buf).digest()
-            self.size = self.left.size + self.right.size
-        elif self.left:
-            self.size = self.left.size
-            self.hash = self.left.hash
+            self.size = left.size + right.size
+        elif is_leaf and left:
+            # Leaf.
+            self.size = left.size
+            self.hash = left.hash
 
     def __eq__(self, other):
         return self.size == other.size and self.hash == other.hash
@@ -187,10 +189,19 @@ class TTH(object):
             for size, hash in leaves]
         self.levels = 0
 
+        # Reduce leaves and branches to get a top node.
         while len(level) > 1:
             self.levels += 1
+
+            # If there's a spare branch on the end, reuse it instead of having
+            # to create a new branch just to hold it.
+            trailing = level[-1] if len(level) % 2 else None
+
             level = [Branch(left, right, thex=self.thex)
                 for left, right in grouper(2, level)]
+
+            if trailing is not None:
+                level.append(trailing)
 
         self.top = level[0]
         self.complete = True
