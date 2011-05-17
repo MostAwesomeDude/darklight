@@ -19,6 +19,13 @@ class Branch(object):
     Nodes can be cut off at any point to form a complete tree.
     """
 
+    offset = 0
+    """
+    Offset of this branch in the file.
+
+    Only makes sense if the branch is a leaf.
+    """
+
     def __init__(self, left=None, right=None, is_leaf=False, thex=True):
         self.left = left
         self.right = right
@@ -114,7 +121,7 @@ class TTH(object):
         """
         Yield every branch (and leaf) in the tree, in no particular order.
 
-        The order is actually currently a right-to-left depth-first traversal,
+        The order is actually currently a left-to-right depth-first traversal,
         but that shouldn't matter.
         """
 
@@ -122,10 +129,10 @@ class TTH(object):
 
         while stack:
             current = stack.pop()
-            if current.right:
-                stack.append(current.right)
             if current.left:
                 stack.append(current.left)
+            if current.right:
+                stack.append(current.right)
             yield current
 
     def iter_incomplete_branches(self):
@@ -161,6 +168,20 @@ class TTH(object):
 
         if not any(self.iter_incomplete_branches()):
             self.complete = True
+
+    def update_offsets(self):
+        """
+        Set up the offsets for each of the leaves.
+        """
+
+        if not self.complete:
+            return
+
+        offset = 0
+        for branch in self.iter_branches():
+            if branch.is_leaf:
+                branch.offset = offset
+                offset += branch.size
 
     def build_tree_from_path(self, f):
         """
@@ -205,3 +226,5 @@ class TTH(object):
 
         self.top = level[0]
         self.complete = True
+
+        self.update_offsets()

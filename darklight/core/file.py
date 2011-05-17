@@ -31,6 +31,7 @@ class DarkTTH(Base):
     size = Column(Integer)
     hash = Column(LargeBinary)
     is_leaf = Column(Boolean, default=False)
+    offset = Column(Integer)
 
     children = relationship("DarkTTH",
         backref=backref("parent", remote_side=id))
@@ -52,6 +53,7 @@ class DarkTTH(Base):
 
         if tth.is_leaf:
             node.is_leaf = True
+            node.offset = tth.offset
         else:
             node.children = [cls.from_tree(tth.left)]
             if tth.right:
