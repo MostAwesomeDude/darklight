@@ -16,7 +16,7 @@ from darklight.tth import TTH
 
 from optparse import OptionParser
 
-parser = OptionParser(usage="Usage: %prog [options] <magnet>")
+parser = OptionParser(usage="Usage: %prog [options] <magnet> <destination>")
 
 options, args = parser.parse_args()
 
@@ -24,7 +24,7 @@ if not args:
     parser.print_help()
     sys.exit()
 
-magnet = args[0]
+magnet, output = args
 
 magnet_dict = parse_magnet(magnet)
 
@@ -59,6 +59,8 @@ def get_stuff_from_server(p):
                 buf.seek(branch.offset + offset)
                 buf.write(d["data"])
                 offset += 65336
+    f = open(output, "wb")
+    f.write(buf.getvalue())
     reactor.stop()
 
 cc.connectTCP("localhost", 56789, 5).addCallbacks(get_stuff_from_server,
