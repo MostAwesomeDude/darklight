@@ -10,7 +10,6 @@ from twisted.internet import reactor
 from twisted.internet.endpoints import TCP4ClientEndpoint
 
 from darklight.core.db import DarkDB
-from darklight.core.file import DarkFile
 from darklight.core.timer import DarkTimer
 
 from darklight.protocol.darkserver import DarkServerProtocol
@@ -71,18 +70,19 @@ class DarkServerFactory(ServerFactory):
         :param int piece: the index of the requested piece
         """
 
-        l = self.factory.cache.search(h, size)
-        if len(l) == 1:
-            buf = self.factory.cache.getdata(l[0], piece)
-            if not buf:
-                print "File buffer was bad..."
-                self.error()
-                return
-            i, sent = 0, 0
-            tth = b32encode(self.factory.cache.getpiece(l[0], piece))
-            return tth, buf
-        else:
-            self.error()
+        tth = self.db.find_branch(h, size)
+        if not tth:
+            return None
+
+        top = tth
+        while top.file is None:
+            top = top.parent
+
+        f = top.file
+        handle = open(f.path, "rb")
+        handle.seek(tth.offset + piece)
+        data = handle.read(65336)
+        return data
 
 class DarkSSLFactory(twisted.internet.ssl.DefaultOpenSSLContextFactory):
 

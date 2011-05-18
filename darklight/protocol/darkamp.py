@@ -59,7 +59,6 @@ class SendPeze(Command):
         ("piece", Integer()),
     ]
     response = [
-        ("hash", String()),
         ("data", String()),
     ]
 
@@ -101,7 +100,13 @@ class DarkAMP(AMP):
     KThnxBai.responder(kthnxbai)
 
     def sendpeze(self, hash, size, piece):
-        return maybeDeferred(self.factory.getpeze(hash, size, piece))
+        d = maybeDeferred(self.factory.sendpeze, hash, size, piece)
+        @d.addCallback
+        def cb(data):
+            if data is None:
+                raise UnknownHashError("Couldn't find hash")
+            return {"data": data}
+        return d
     SendPeze.responder(sendpeze)
 
     def version(self):

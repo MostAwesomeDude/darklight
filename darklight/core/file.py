@@ -98,6 +98,8 @@ class DarkFile(Base):
         mtime = s[stat.ST_MTIME]
 
         if size != self.size or mtime != self.mtime:
+            self.size = size
+            self.mtime = mtime
             self.dirty = True
 
     def clean(self):
