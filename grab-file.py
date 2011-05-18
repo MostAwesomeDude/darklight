@@ -17,6 +17,8 @@ from darklight.tth import TTH
 from optparse import OptionParser
 
 parser = OptionParser(usage="Usage: %prog [options] <magnet> <destination>")
+parser.add_option("-s", "--server", dest="host", default="localhost")
+parser.add_option("-p", "--port", dest="port", type="int", default=56789)
 
 options, args = parser.parse_args()
 
@@ -63,7 +65,7 @@ def get_stuff_from_server(p):
     f.write(buf.getvalue())
     reactor.stop()
 
-cc.connectTCP("localhost", 56789, 5).addCallbacks(get_stuff_from_server,
-    lambda none: reactor.stop())
+cc.connectTCP(options.host, options.port, 5).addCallbacks(
+    get_stuff_from_server, lambda none: reactor.stop())
 
 reactor.run()
