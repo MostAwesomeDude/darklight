@@ -55,8 +55,8 @@ class ClientLogic(object):
 
     def setup_servers(self):
         column_names, column_types = zip(*server_columns)
-        self.server_list = gtk.ListStore(*column_types)
-        server_view = self.gui.get_object("server-view")
+        self.server_list = self.gui.get_object("server_list")
+        server_view = self.gui.get_object("server_view")
         server_view.set_model(self.server_list)
         server_view.set_reorderable(True)
 
