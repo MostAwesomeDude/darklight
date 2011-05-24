@@ -2,6 +2,22 @@
 <interface>
   <requires lib="gtk+" version="2.16"/>
   <!-- interface-naming-policy project-wide -->
+  <object class="GtkListStore" id="server_list">
+    <columns>
+      <!-- column-name protocol -->
+      <column type="gchararray"/>
+      <!-- column-name api -->
+      <column type="gchararray"/>
+      <!-- column-name version -->
+      <column type="gchararray"/>
+    </columns>
+  </object>
+  <object class="GtkListStore" id="file_list">
+    <columns>
+      <!-- column-name magnet -->
+      <column type="gchararray"/>
+    </columns>
+  </object>
   <object class="GtkWindow" id="main">
     <signal name="delete_event" handler="on_main_delete_event"/>
     <child>
@@ -70,13 +86,33 @@
           </packing>
         </child>
         <child>
-          <object class="GtkTreeView" id="server-view">
+          <object class="GtkTreeView" id="server_view">
             <property name="visible">True</property>
             <property name="can_focus">True</property>
+            <property name="model">server_list</property>
             <signal name="button_press_event" handler="on_server_mouse_clicked"/>
           </object>
           <packing>
             <property name="position">1</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkHSeparator" id="hseparator1">
+            <property name="visible">True</property>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="position">2</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkTreeView" id="file_view">
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="model">file_list</property>
+          </object>
+          <packing>
+            <property name="position">3</property>
           </packing>
         </child>
         <child>
@@ -86,7 +122,7 @@
           </object>
           <packing>
             <property name="expand">False</property>
-            <property name="position">2</property>
+            <property name="position">4</property>
           </packing>
         </child>
       </object>

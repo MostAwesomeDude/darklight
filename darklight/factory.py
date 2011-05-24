@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 
-from base64 import b32encode
 import os
 
 from twisted.internet.protocol import ServerFactory
