@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 
-from StringIO import StringIO
 import sys
 
 from twisted.internet import reactor
@@ -48,8 +47,8 @@ def get_stuff_from_server(p):
             tth.extend_branch(branch, d)
             print "Extended %r" % branch
     # Grab each section sequentially.
-    buf = StringIO()
     tth.update_offsets()
+    f = open(output, "wb")
     for branch in tth.iter_branches():
         if branch.is_leaf:
             # Grab the offsets for this leaf.
@@ -58,11 +57,10 @@ def get_stuff_from_server(p):
             while branch.size > offset:
                 d = yield p.callRemote(SendPeze, size=branch.size,
                                        hash=branch.hash, piece=offset)
-                buf.seek(branch.offset + offset)
-                buf.write(d["data"])
+                f.seek(branch.offset + offset)
+                f.write(d["data"])
                 offset += 65336
-    f = open(output, "wb")
-    f.write(buf.getvalue())
+    f.close()
     reactor.stop()
 
 cc.connectTCP(options.host, options.port, 5).addCallbacks(
