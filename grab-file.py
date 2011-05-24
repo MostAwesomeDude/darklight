@@ -4,13 +4,12 @@ import sys
 
 from twisted.internet import reactor
 from twisted.internet.defer import inlineCallbacks
-from twisted.internet.protocol import ClientCreator
 from twisted.python import log
 log.startLogging(sys.stdout)
 
+from darklight.client import DarkClient
 from darklight.magnet import parse_magnet
 from darklight.protocol.darkamp import HazTree, SendPeze
-from darklight.protocol.darkclient import DarkClientProtocol
 from darklight.tth import TTH
 
 from optparse import OptionParser
@@ -29,12 +28,10 @@ magnet, output = args
 
 magnet_dict = parse_magnet(magnet)
 
-cc = ClientCreator(reactor, DarkClientProtocol)
+client = DarkClient()
 
 @inlineCallbacks
 def get_stuff_from_server(p):
-    print "Initial handshake..."
-    p = yield p.connected_deferred
     print "Connected, getting server info..."
     yield p.get_remote_info()
     print "Remote server is %s, API version %d" % (p.remote_version,
@@ -63,7 +60,7 @@ def get_stuff_from_server(p):
     f.close()
     reactor.stop()
 
-cc.connectTCP(options.host, options.port, 5).addCallbacks(
+client.add_server(options.host, options.port).addCallbacks(
     get_stuff_from_server, lambda none: reactor.stop())
 
 reactor.run()
