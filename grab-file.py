@@ -33,9 +33,10 @@ client = DarkClient()
 @inlineCallbacks
 def get_stuff_from_server(p):
     print "Connected, getting server info..."
-    yield p.get_remote_info()
-    print "Remote server is %s, API version %d" % (p.remote_version,
-                                                   p.remote_api)
+    api, version = yield p.get_remote_info()
+    print version
+    print api
+    print "Remote server is %s, API version %d" % (version, api)
     tth = TTH.from_size_and_hash(magnet_dict["size"], magnet_dict["hash"])
     while not tth.complete:
         for branch in tth.iter_incomplete_branches():

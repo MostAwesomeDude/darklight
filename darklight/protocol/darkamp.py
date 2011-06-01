@@ -114,14 +114,22 @@ class DarkAMP(AMP):
     Version.responder(version)
 
     def get_remote_info(self):
+        """
+        Get information about this connection.
+
+        Returns a Deferred which will fire with a tuple of API and version.
+        """
+
         d1 = self.callRemote(CheckAPI)
+        @d1.addCallback
         def cb1(d):
             self.remote_api = d["version"]
-        d1.addCallback(cb1)
+            return self.remote_api
 
         d2 = self.callRemote(Version)
+        @d2.addCallback
         def cb2(d):
             self.remote_version = d["version"]
-        d2.addCallback(cb2)
+            return self.remote_version
 
         return gatherResults([d1, d2])
