@@ -21,6 +21,8 @@ class Curdle(object):
         self.status = self.screen.derwin(1, max_x, max_y - 1, 0)
         curses.init_pair(1, curses.COLOR_GREEN, curses.COLOR_BLACK)
 
+        self.servers = self.screen.derwin(max_y - 2, max_x, 0, 0)
+
     def fileno(self):
         return 0
 
@@ -59,7 +61,15 @@ class Curdle(object):
             curses.A_BOLD | curses.color_pair(1))
         self.status.refresh()
 
+    def update_servers(self):
+        self.servers.clear()
+        for i, server in enumerate(self.client.connections):
+            self.servers.addstr(i, 0, str(server))
+        self.servers.refresh()
+
 curdle = Curdle()
 curdle.start()
 reactor.addReader(curdle)
+d = curdle.client.add_server("localhost", 56789)
+d.addCallback(lambda chaff: curdle.update_servers())
 reactor.run()
