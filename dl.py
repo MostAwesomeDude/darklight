@@ -2,12 +2,10 @@
 
 import sys
 
-import twisted.internet.protocol
-import twisted.internet.gtk2reactor
-twisted.internet.gtk2reactor.install()
+from twisted.internet import gtk2reactor
+gtk2reactor.install()
 
 from twisted.internet import reactor
-import twisted.internet.ssl
 from twisted.python import log
 log.startLogging(sys.stdout)
 
@@ -15,7 +13,7 @@ import pygtk
 pygtk.require("2.0")
 import gtk
 
-from darklight.protocol.darkclient import DarkClientProtocol
+from darklight.client import DarkClient
 
 gui = gtk.Builder()
 gui.add_from_file("gui.glade")
@@ -39,9 +37,7 @@ class ClientLogic(object):
 
         self.server_popup = self.gui.get_object("server_popup")
 
-        self.connections = set()
-        self.cc = twisted.internet.protocol.ClientCreator(reactor,
-            DarkClientProtocol)
+        self.client = DarkClient()
 
         statusbar = self.gui.get_object("statusbar")
         self.status_context = statusbar.get_context_id("")
@@ -68,7 +64,7 @@ class ClientLogic(object):
             server_view.append_column(column)
 
     def on_main_delete_event(self, window, event):
-        for connection in self.connections:
+        for connection in self.client.connections:
             connection.transport.loseConnection()
 
         reactor.stop()
@@ -92,8 +88,8 @@ class ClientLogic(object):
 
         self.set_status("Connecting to %s:%d" % (host, port))
 
-        d = self.cc.connectTCP(host, port, 5)
-        d.addCallback(self.connected_callback)
+        d = self.client.add_server(host, port)
+        d.addCallback(self.get_server_info)
 
     def on_server_mouse_clicked(self, widget, event):
         if event.button == 3:
@@ -110,22 +106,16 @@ class ClientLogic(object):
             return True
 
     def on_disconnect_server(self, widget):
-        for connection in self.connections:
+        for connection in self.client.connections:
             connection.transport.loseConnection()
 
         self.update_servers()
-
-    def connected_callback(self, protocol):
-        self.set_status("Connected successfully!")
-
-        protocol.connected_deferred.addCallback(self.get_server_info)
 
     def get_server_info(self, protocol):
         """
         Get info about a server.
         """
 
-        self.connections.add(protocol)
         self.update_servers()
         d = protocol.get_remote_info()
         d.addCallback(lambda l: self.update_servers())
@@ -133,7 +123,7 @@ class ClientLogic(object):
     def update_servers(self):
         self.server_list.clear()
 
-        for connection in self.connections:
+        for connection in self.client.connections:
             l = [str(connection)]
             l.append(connection.remote_version)
             l.append(connection.remote_api)
