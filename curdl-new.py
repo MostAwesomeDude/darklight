@@ -14,9 +14,12 @@ class Curdle(object):
     def __init__(self):
         self.client = DarkClient()
         self.screen = curses.initscr()
+        curses.start_color()
 
         max_y, max_x = self.screen.getmaxyx()
+
         self.status = self.screen.derwin(1, max_x, max_y - 1, 0)
+        curses.init_pair(1, curses.COLOR_GREEN, curses.COLOR_BLACK)
 
     def fileno(self):
         return 0
@@ -49,8 +52,11 @@ class Curdle(object):
 
     def set_status(self, message):
         y, x = self.status.getmaxyx()
+        if x > len(message):
+            message = message.center(x - 1, " ")
         self.status.clear()
-        self.status.addnstr(0, 0, message, x)
+        self.status.addnstr(0, 0, message, x,
+            curses.A_BOLD | curses.color_pair(1))
         self.status.refresh()
 
 curdle = Curdle()
