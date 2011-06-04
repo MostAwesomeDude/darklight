@@ -90,6 +90,8 @@ class ClientLogic(object):
 
         d = self.client.add_server(host, port)
         d.addCallback(self.get_server_info)
+        d.addCallback(
+            lambda none: self.set_status("Connected to %s:%d" % (host, port)))
 
     def on_server_mouse_clicked(self, widget, event):
         if event.button == 3:
