@@ -12,11 +12,15 @@ class ServerInfo(urwid.Text):
         urwid.Text.__init__(self, "", **kwargs)
 
         self.server = server
-        self._update_server_info()
+        d = server.get_remote_info()
+        @d.addCallback
+        def cb(data):
+            self.api, self.version = data
+            self._update_server_info()
 
     def _update_server_info(self):
         self.set_text("%s %s %s" %
-            (self.server, self.server.remote_version, self.server.remote_api))
+            (self.server, self.version, self.api))
 
 palette = [
     ("header", "light green", "default"),
